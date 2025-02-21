@@ -122,6 +122,7 @@ document.getElementById('covid-status-card').addEventListener('click', function(
     window.open('https://docs.google.com/spreadsheets/d/1pgLCwJPxPpGO_-ro_J78QYqLzjrGHgTBKHL3ngybBbY/edit?gid=0#gid=0');
 });
 
+  //グラフフォントの見直し
 
 
 // ✅ グラフ作成関数（フォントサイズを動的に変更）
@@ -138,21 +139,80 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
     let titleFontSize, axisTitleFontSize, axisLabelFontSize;
 
     if (screenWidth > 1200) { 
-        // PC向け
+        // 📌 PC向け
         titleFontSize = 62;
         axisTitleFontSize = 46;
         axisLabelFontSize = 40;
     } else if (screenWidth > 768) { 
-        // タブレット向け
+        // 📌 タブレット向け
         titleFontSize = 25;
         axisTitleFontSize = 18;
         axisLabelFontSize = 16;
     } else { 
-        // スマホ向け
-        titleFontSize = 25;
-        axisTitleFontSize = 18;
-        axisLabelFontSize = 16;
+        // 📌 スマホ向け
+        titleFontSize = 20;
+        axisTitleFontSize = 14;
+        axisLabelFontSize = 12;
     }
+
+    // ✅ 新しいグラフを作成し、インスタンスを保存
+    canvas.chartInstance = new Chart(canvas, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                borderColor: color,
+                backgroundColor: color,
+                fill: false,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                title: { 
+                    display: true, 
+                    text: label, 
+                    font: { size: titleFontSize },
+                    padding: { top: 10, bottom: 10 },
+                    maxWidth: screenWidth * 0.8, // 📌 タイトルが横に広がりすぎないようにする
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: maxY,
+                    title: { 
+                        display: true, 
+                        text: unit, 
+                        font: { size: axisTitleFontSize },
+                        padding: { top: 10, bottom: 10 },
+                        maxWidth: screenWidth * 0.8 // 📌 長すぎる場合に折り返し
+                    },
+                    ticks: { 
+                        font: { size: axisLabelFontSize },
+                        autoSkip: true, // 📌 自動でラベルを間引く
+                        maxRotation: 0, // 📌 横に広がらないようにする
+                        minRotation: 0
+                    }
+                },
+                x: { 
+                    ticks: { 
+                        font: { size: axisLabelFontSize },
+                        autoSkip: true, // 📌 横軸ラベルも自動で間引く
+                        maxRotation: 0, // 📌 横に広がらないようにする
+                        minRotation: 0
+                    }
+                }
+            }
+        }
+    });
+}
+
+    //フォントの見直しここまで
 
     // ✅ 新しいグラフを作成し、インスタンスを保存
     canvas.chartInstance = new Chart(canvas, {
