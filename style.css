@@ -109,6 +109,7 @@ h1.left-align {
     text-align: center;
     border-radius: 8px; /* 角を丸く */
     cursor: pointer;
+    transition: background-color 0.3s ease-in-out; /* ✅ なめらかに色を変化 */
 }
 
 /* ✅ ホバー時に色をやや濃くする */
