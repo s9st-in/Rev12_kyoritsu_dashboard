@@ -100,6 +100,18 @@ h1.left-align {
     background-color: #A9D0F5; /* ホバー時は少し濃い青 */
 }
 
+/* ✅ メディサイナスカード */
+#new-card {
+    background-color: #ffcc00; /* ✅ 背景色を設定（好みに応じて変更可） */
+    color: #333; /* 文字色 */
+    font-size: 24px; /* フォントサイズ */
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px; /* 角を丸く */
+    cursor: pointer;
+}
+
+
 /* ✅ グラフエリアのレイアウト */
 .charts-grid {
     display: grid;
