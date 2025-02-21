@@ -110,7 +110,7 @@ async function fetchData() {
 
 // ✅ 手術台帳を開くクリックイベント
 document.getElementById('surgery-register-card').addEventListener('click', function() {
-    window.open('https://docs.google.com/spreadsheets/d/1CHU8Cgxgg5IvL3nB6ackAdqxe7-CNkmWDvtYE-keuXI/edit', '_blank');
+    window.open('https://docs.google.com/spreadsheets/d/1CHU8Cgxgg5IvL3nB6ackAdqxe7-CNkmWDvtYE-keuXI/preview?rm=minimal');
 });
 
 // ✅ 当直管理表を開くクリックイベント（新規追加）
