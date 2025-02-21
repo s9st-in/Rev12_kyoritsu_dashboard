@@ -1,0 +1,190 @@
+/* ✅ 全体の基本スタイル */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+    background-color: #f9f9f9;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 36px; /* ✅ タイトルのフォントサイズを大きく */
+    font-weight: bold;
+}
+
+.date-display {
+    font-size: 28px;
+    margin: 10px 0;
+    font-weight: bold;
+    text-align: left; /* 左寄せ */
+    padding-left: 20px; /* 余白を調整 */
+}
+
+h1.left-align {
+    text-align: left;
+    padding-left: 20px;
+}
+
+.update-time {
+    font-size: 24px;
+    color: #666;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+/* ✅ ダッシュボードカードレイアウト */
+.dashboard {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 20px;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    min-height: 120px;
+    text-align: center;
+    font-size: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: background-color 0.3s ease-in-out; /* ✅ 色変化のアニメーション */
+}
+
+.card h3 {
+    margin: 5px 0;
+    color: #444;
+    font-size: 28px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card strong {
+    font-size: 32px;
+    color: #000;
+    font-weight: bold;
+}
+
+/* ✅ 手術台帳カード（薄いピンク） */
+#surgery-register-card {
+    background-color: #FFD1DC; /* 薄いピンク */
+}
+
+#surgery-register-card:hover {
+    background-color: #FFB6C1; /* ホバー時は少し濃いピンク */
+}
+
+/* ✅ 当直管理表カード（薄い緑） */
+#duty-management-card {
+    background-color: #D3F9D8; /* 薄い緑 */
+}
+
+#duty-management-card:hover {
+    background-color: #B2E7B6; /* ホバー時は少し濃い緑 */
+}
+
+/* ✅ 新型コロナ感染状況カード（薄い青） */
+#covid-status-card {
+    background-color: #D0E7FF; /* 薄い青 */
+}
+
+#covid-status-card:hover {
+    background-color: #A9D0F5; /* ホバー時は少し濃い青 */
+}
+
+/* ✅ グラフエリアのレイアウト */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 10px;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* ✅ グラフのスタイル調整 */
+canvas {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+    height: 350px !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    margin: 0 auto;
+    font-size: 24px !important;
+}
+
+/* ✅ 変数を定義（カードのサイズを自由に変更可能に） */
+:root {
+    --header-card-width: 700px;  /* ★ デフォルトの横幅（自由に変更可） */
+    --header-card-height: 220px; /* ★ デフォルトの縦幅（自由に変更可） */
+}
+
+/* ✅ ヘッダーエリアのレイアウト */
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+}
+
+/* ✅ タイトルのエリアを確保し、カードとの間にスペースを作る */
+.header-left {
+    flex-grow: 1;
+    margin-right: 50px;
+}
+
+/* ✅ ヘッダー内のカードを右端に寄せる */
+.header-cards {
+    display: flex;
+    gap: 15px;
+    margin-left: auto;
+    flex-shrink: 0;
+    min-width: calc(var(--header-card-width) * 2 + 30px); /* カード2枚分の幅＋間隔 */
+}
+
+/* ✅ 追加: タイトル横のカードデザイン（サイズ自由変更可能） */
+.header-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    width: var(--header-card-width);  /* ★ 自由に変更できる横幅 */
+    height: var(--header-card-height); /* ★ 自由に変更できる縦幅 */
+    max-width: 100%;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ✅ レスポンシブ対応（タブレット） */
+@media (max-width: 1024px) {
+    .charts-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    canvas {
+        height: 300px !important;
+    }
+}
+
+/* ✅ レスポンシブ対応（スマホ） */
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    canvas {
+        height: 250px !important;
+    }
+}
