@@ -111,6 +111,11 @@ h1.left-align {
     cursor: pointer;
 }
 
+/* ✅ ホバー時に色をやや濃くする */
+#new-card:hover {
+    background-color: #e6b800; /* ✅ 少し濃い色 */
+}
+
 
 /* ✅ グラフエリアのレイアウト */
 .charts-grid {
