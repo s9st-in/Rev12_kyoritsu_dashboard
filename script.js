@@ -124,13 +124,34 @@ document.getElementById('covid-status-card').addEventListener('click', function(
 
 
 
-// ✅ グラフ作成関数
+// ✅ グラフ作成関数（フォントサイズを動的に変更）
 function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
     const canvas = document.getElementById(canvasId);
 
-    // ✅ 既存のグラフがある場合は削除
+    // ✅ 既存のグラフがある場合は削除（エラー防止）
     if (canvas.chartInstance) {
         canvas.chartInstance.destroy();
+    }
+
+    // ✅ 画面幅に応じたフォントサイズの調整（適切な範囲で変更）
+    let screenWidth = window.innerWidth;
+    let titleFontSize, axisTitleFontSize, axisLabelFontSize;
+
+    if (screenWidth > 1200) { 
+        // PC向け
+        titleFontSize = 62;
+        axisTitleFontSize = 46;
+        axisLabelFontSize = 40;
+    } else if (screenWidth > 768) { 
+        // タブレット向け
+        titleFontSize = 25;
+        axisTitleFontSize = 18;
+        axisLabelFontSize = 16;
+    } else { 
+        // スマホ向け
+        titleFontSize = 25;
+        axisTitleFontSize = 18;
+        axisLabelFontSize = 16;
     }
 
     // ✅ 新しいグラフを作成し、インスタンスを保存
@@ -151,20 +172,32 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                title: { display: true, text: label, font: { size: 48, weight: 'bold' } }
+                title: { 
+                    display: true, 
+                    text: label, 
+                    font: { size: titleFontSize } // ✅ `weight` を削除
+                }
             },
             scales: {
                 y: {
                     beginAtZero: true,
                     max: maxY,
-                    title: { display: true, text: unit, font: { size: 36, weight: 'bold' } },
-                    ticks: { font: { size: 36, weight: 'bold' } }
+                    title: { 
+                        display: true, 
+                        text: unit, 
+                        font: { size: axisTitleFontSize } 
+                    },
+                    ticks: { font: { size: axisLabelFontSize } }
                 },
-                x: { ticks: { font: { size: 36, weight: 'bold' } } }
+                x: { 
+                    ticks: { font: { size: axisLabelFontSize } } 
+                }
             }
         }
     });
 }
+
+
 
 
 // ✅ 日付フォーマット関数
