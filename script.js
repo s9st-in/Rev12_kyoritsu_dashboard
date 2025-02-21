@@ -86,6 +86,7 @@ async function fetchData() {
         document.querySelector(".dashboard .card:nth-child(5) strong").innerText = `${latestData["一般病棟在院数"]}/202 床`;
         document.querySelector(".dashboard .card:nth-child(6) strong").innerText = `${latestData["集中治療室在院数"]}/16 床`;
         document.querySelector(".dashboard .card:nth-child(7) strong").innerText = `${latestData["平均在院日数"]}日`; // 追加
+        
 
         // ✅ グラフ描画（表示する期間を変更可能）
         const daysToShow = 14; // ← 変更する期間（例: 14日分を表示）
@@ -122,6 +123,10 @@ document.getElementById('covid-status-card').addEventListener('click', function(
     window.open('https://docs.google.com/spreadsheets/d/1pgLCwJPxPpGO_-ro_J78QYqLzjrGHgTBKHL3ngybBbY/edit?gid=0#gid=0');
 });
 
+// ✅ メディサイナスイメージを開くクリックイベント（新規追加）
+document.getElementById('new-card').addEventListener('click', function() {
+    window.open('https://docs.google.com/spreadsheets/d/1d8xfcB5b59-5GhaKiyIuZ_ZmluTgG8cjht5sRPsS9xw/edit?gid=0#gid=0');
+});
 
 
 // ✅ グラフ作成関数（フォントサイズを動的に変更）
