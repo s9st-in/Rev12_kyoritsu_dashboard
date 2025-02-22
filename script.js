@@ -231,3 +231,6 @@ fetchSpecialData();  // ✅ 「水曜会」「経営戦略室の戦略」のデ�
 
 // ✅ タイトルのフォントサイズ変更
 document.querySelector("h1.left-align").style.fontSize = "32px"; // ← フォントサイズを変更
+
+
+
