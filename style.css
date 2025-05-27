@@ -206,3 +206,8 @@ canvas {
         height: 250px !important;
     }
 }
+
+/* ✅ 「経営戦略室の戦略」のタイトル（h3）を非表示にする */
+#keiei-card h3 {
+    display: none;
+}
