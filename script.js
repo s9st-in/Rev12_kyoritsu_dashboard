@@ -31,12 +31,13 @@ async function fetchSpecialData() {
 
 
 
-        // ✅ 追加したカードのサイズを変更（横幅と高さを指定）
-        document.getElementById("suiyokai-card").style.width = "700px";  // 横幅
+        // ✅ 水曜会カードのサイズを変更（横幅と高さを指定）
+        document.getElementById("suiyokai-card").style.width = "680px";  // 横幅
         document.getElementById("suiyokai-card").style.height = "220px"; // 高さ
         document.getElementById("suiyokai-card").style.textAlign = "left"; // 左詰め表示
 
-        document.getElementById("keiei-card").style.width = "700px";  // 横幅
+         // ✅ 経営戦略カードのサイズを変更（横幅と高さを指定）
+        document.getElementById("keiei-card").style.width = "680px";  // 横幅
         document.getElementById("keiei-card").style.height = "220px"; // 高さ
         document.getElementById("keiei-card").style.textAlign = "left"; // 左詰め表示
 
