@@ -25,9 +25,9 @@ async function fetchSpecialData() {
        // ✅ タイトルを維持しながらデータを左詰めで表示　　*2025.5.28 「経営戦略室より」を追加
         // ✅ 『』を追加し、左詰めに設定
         document.getElementById("suiyokai-card").innerHTML = `<strong>『水曜会 Top Down!』</strong><br>${result.specialData.suiyokai || "データなし"}`;
-        document.getElementById("keiei-card").innerHTML = `<div style="text-align:center; font-size:32px; font-weight:bold;">『経営戦略室より』</div>
- 　　　 <div style="text-align:left; font-size:24px; margin-top:10px;">R8年度診療報酬改定に向けて議論がスタート<br>
-   　　 （急性期医療に関するテーマ） </div>`;
+        document.getElementById("keiei-card").innerHTML = `<div style="text-align:center; font-size:32px; font-weight:bold;">『お知らせ』</div>
+ 　　　 <div style="text-align:left; font-size:24px; margin-top:10px;">・R8年度診療報酬改定に向けて議論がスタート<br>
+   　　 （急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室)</div>`;
 
 
 
