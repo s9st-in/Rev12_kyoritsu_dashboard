@@ -25,7 +25,7 @@ async function fetchSpecialData() {
        // ✅ タイトルを維持しながらデータを左詰めで表示
         // ✅ 『』を追加し、左詰めに設定
         document.getElementById("suiyokai-card").innerHTML = `<strong>『水曜会 Top Down!』</strong><br>${result.specialData.suiyokai || "データなし"}`;
-        document.getElementById("keiei-card").innerHTML = `<strong>『経営戦略室の戦略』</strong><br>${result.specialData.keiei || "データなし"}`;
+        document.getElementById("keiei-card").innerHTML = `<strong>『経営戦略室より』</strong><br>R8年度診療報酬改定に向けて議論がスタート（急性期医療に関するテーマ）`;
 
         // ✅ 追加したカードのサイズを変更（横幅と高さを指定）
         document.getElementById("suiyokai-card").style.width = "700px";  // 横幅
