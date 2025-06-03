@@ -27,7 +27,7 @@ async function fetchSpecialData() {
         document.getElementById("suiyokai-card").innerHTML = `<strong>『水曜会 Top Down!』</strong><br>${result.specialData.suiyokai || "データなし"}`;
         document.getElementById("keiei-card").innerHTML = `<div style="text-align:center; font-size:32px; font-weight:bold;">『お知らせ』</div>
  　　　 <div style="text-align:left; font-size:24px; margin-top:10px;">・R8年度診療報酬改定に向けて議論がスタート<br>
-   　　 （急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室.)<br>画像診断センター調査終了</div>`;
+   　　 （急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室)<br>＊画像診断センター調査終了しました！</div>`;
 
 
 
