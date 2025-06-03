@@ -130,7 +130,7 @@ document.getElementById('covid-status-card').addEventListener('click', function(
 
 // ✅ メディサイナスイメージを開くクリックイベント（新規追加）
 document.getElementById('new-card').addEventListener('click', function() {
-    window.open('https://docs.google.com/spreadsheets/d/1d8xfcB5b59-5GhaKiyIuZ_ZmluTgG8cjht5sRPsS9xw/preview?rm=minimal');
+    window.open('https://docs.google.com/spreadsheets/d/16G6LfsDQSD_ogAPDSj6cL4LpVGWFsZxnhdp_GfZA7e8/preview?rm=minimal');
 });
 
 
