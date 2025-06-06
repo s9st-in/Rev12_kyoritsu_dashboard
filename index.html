@@ -32,11 +32,11 @@
         <div class="card"><h3>一般病棟在院数</h3><strong>--/218 床</strong></div>
         <div class="card"><h3>集中治療室在院数</h3><strong>--/16 床</strong></div>
         <div class="card"><h3>平均在院日数</h3><strong>--日</strong></div>
-        <div class="card" id="surgery-register-card"><h3>手術台帳</h3><strong>クリックして表示</strong></div>
-        <div class="card" id="duty-management-card"><h3>当直管理表</h3><strong>クリックして表示</strong></div>
-        <div class="card" id="covid-status-card"><h3>新型コロナ感染状況</h3><strong>クリックして表示</strong></div>
+        <div class="card" id="surgery-register-card" onclick="openExternalLink('https://docs.google.com/spreadsheets/d/1CHU8Cgxgg5IvL3nB6ackAdqxe7-CNkmWDvtYE-keuXI/edit')"><h3>手術台帳</h3><strong>クリックして表示</strong></div>
+        <div class="card" id="duty-management-card" onclick="openExternalLink('https://docs.google.com/spreadsheets/d/1EX0t4wpSJZkEkhZ38PUGIyZVMOeGOTNdy2OI3rb_CTc/edit')"><h3>当直管理表</h3><strong>クリックして表示</strong></div>
+        <div class="card" id="covid-status-card" onclick="openExternalLink('https://docs.google.com/spreadsheets/d/1pgLCwJPxPpGO_-ro_J78QYqLzjrGHgTBKHL3ngybBbY/edit?gid=0#gid=0')"><h3>新型コロナ感染状況</h3><strong>クリックして表示</strong></div>
         <!-- ✅ 新しく追加するメディサイナスカード -->
-        <div class="card" id="new-card"><strong>『空床マップ』<br></h3><strong>クリックして表示</strong></div>
+        <div class="card" id="new-card" onclick="openExternalLink('https://docs.google.com/spreadsheets/d/16G6LfsDQSD_ogAPDSj6cL4LpVGWFsZxnhdp_GfZA7e8/preview?rm=minimal')"><strong>『空床マップ』<br></h3><strong>クリックして表示</strong></div>
     </div>
 
     <div class="charts-grid">
@@ -52,18 +52,27 @@
     </div>
 
     <script src="script.js"></script>
+
+    <!-- 外部スクリプトの起点（エントリーポイント）はなるべく1つにまとめるのが上策です。 script.jsに集約しましょう。-->
     <script>
-        document.getElementById('surgery-register-card').addEventListener('click', function() {
-            window.open('https://docs.google.com/spreadsheets/d/1CHU8Cgxgg5IvL3nB6ackAdqxe7-CNkmWDvtYE-keuXI/edit', '_blank');
-        });
+        
+        // カードをクリックして新しく開く部分のコードは、URL以外は定義の変わらないコートです
+        // script.js内にopenExternalLink()を記述しました。
+        // イベントハンドラはDOM（id要素を示すセレクタ）からだけでなく、HTML属性内に記述することができます
+        // clickイベントの場合はhtml要素のonclick属性としてJavaScriptの式を呼び出すことができます。
+        // コードリファクタリングの観点から、今回はhtml要素のonClick属性を使うほうがスマートでしょう。
 
-        document.getElementById('duty-management-card').addEventListener('click', function() {
-            window.open('https://docs.google.com/spreadsheets/d/1EX0t4wpSJZkEkhZ38PUGIyZVMOeGOTNdy2OI3rb_CTc/edit', '_blank');
-        });
+        // document.getElementById('surgery-register-card').addEventListener('click', function() {
+        //     window.open('https://docs.google.com/spreadsheets/d/1CHU8Cgxgg5IvL3nB6ackAdqxe7-CNkmWDvtYE-keuXI/edit', '_blank');
+        // });
 
-        document.getElementById('covid-status-card').addEventListener('click', function() {
-            window.open('https://docs.google.com/spreadsheets/d/1pgLCwJPxPpGO_-ro_J78QYqLzjrGHgTBKHL3ngybBbY/edit?gid=0#gid=0'); // ここに「新型コロナ感染状況」のスプレッドシートURLを入力
-        });
+        // document.getElementById('duty-management-card').addEventListener('click', function() {
+        //     window.open('https://docs.google.com/spreadsheets/d/1EX0t4wpSJZkEkhZ38PUGIyZVMOeGOTNdy2OI3rb_CTc/edit', '_blank');
+        // });
+
+        // document.getElementById('covid-status-card').addEventListener('click', function() {
+        //     window.open('https://docs.google.com/spreadsheets/d/1pgLCwJPxPpGO_-ro_J78QYqLzjrGHgTBKHL3ngybBbY/edit?gid=0#gid=0'); // ここに「新型コロナ感染状況」のスプレッドシートURLを入力
+        // });
 
         // グラフの再表示
         // script.js内でもfetchData()を呼び出しており、二重呼び出しとなっています。index.html側の呼び出しを削除してください。

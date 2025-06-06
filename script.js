@@ -22,7 +22,7 @@ async function fetchSpecialData() {
             return;
         }
 
-       // ✅ タイトルを維持しながらデータを左詰めで表示　　*2025.5.28 「経営戦略室より」を追加
+        // ✅ タイトルを維持しながらデータを左詰めで表示　　*2025.5.28 「経営戦略室より」を追加
         // ✅ 『』を追加し、左詰めに設定
         document.getElementById("suiyokai-card").innerHTML = `<strong>『水曜会 Top Down!』</strong><br>${result.specialData.suiyokai || "データなし"}`;
         document.getElementById("keiei-card").innerHTML = `<div style="text-align:center; font-size:32px; font-weight:bold;">『お知らせ』</div>
@@ -36,12 +36,12 @@ async function fetchSpecialData() {
         document.getElementById("suiyokai-card").style.height = "220px"; // 高さ
         document.getElementById("suiyokai-card").style.textAlign = "left"; // 左詰め表示
 
-         // ✅ 経営戦略カードのサイズを変更（横幅と高さを指定）
+        // ✅ 経営戦略カードのサイズを変更（横幅と高さを指定）
         document.getElementById("keiei-card").style.width = "680px";  // 横幅
         document.getElementById("keiei-card").style.height = "220px"; // 高さ
         document.getElementById("keiei-card").style.textAlign = "left"; // 左詰め表示
 
-        
+
     } catch (error) {
         console.error("❌ 特別データ取得エラー:", error);
     }
@@ -76,7 +76,7 @@ async function fetchData() {
         document.getElementById("latest-date").innerHTML = `${formattedDate}<br><span class="update-time">更新時刻：${formattedTime}</span>`;
 
         // ✅ フォントサイズを大きく
-        document.getElementById("latest-date").style.fontSize = "30px";  
+        document.getElementById("latest-date").style.fontSize = "30px";
 
 
         // ✅ ダッシュボードデータの表示
@@ -91,12 +91,12 @@ async function fetchData() {
         document.querySelector(".dashboard .card:nth-child(5) strong").innerText = `${latestData["一般病棟在院数"]}/202 床`;
         document.querySelector(".dashboard .card:nth-child(6) strong").innerText = `${latestData["集中治療室在院数"]}/16 床`;
         document.querySelector(".dashboard .card:nth-child(7) strong").innerText = `${latestData["平均在院日数"]}日`; // 追加
-        
+
 
         // ✅ グラフ描画（表示する期間を変更可能）
         const daysToShow = 14; // ← 変更する期間（例: 14日分を表示）
         const labels = result.data.slice(-daysToShow).map(item => formatDateForChart(item["日付"]));
-        
+
         createChart("bedChart", "病床利用率 (%)", labels, result.data.map(item => item["病床利用率 (%)"] * 100), "blue", "％", 110);
         createChart("ambulanceChart", "救急車搬入数", labels, result.data.map(item => item["救急車搬入数"]), "red", "台");
         createChart("inpatientsChart", "入院患者数", labels, result.data.map(item => item["入院患者数"]), "green", "人");
@@ -104,7 +104,7 @@ async function fetchData() {
         createChart("generalWardChart", "一般病棟在院数", labels, result.data.map(item => item["一般病棟在院数"]), "purple", "床");
         createChart("icuChart", "集中治療室在院数", labels, result.data.map(item => item["集中治療室在院数"]), "teal", "床");
 
-                // ✅ 平均在院日数のグラフを追加（場合によっては改修検討）
+        // ✅ 平均在院日数のグラフを追加（場合によっては改修検討）
         createChart("averageStayChart", "平均在院日数", labels, result.data.slice(-daysToShow).map(item => item["平均在院日数"]), "darkblue", "日");
 
 
@@ -113,25 +113,29 @@ async function fetchData() {
     }
 }
 
-// ✅ 手術台帳を開くクリックイベント
-document.getElementById('surgery-register-card').addEventListener('click', function() {
-    window.open('https://docs.google.com/spreadsheets/d/1CHU8Cgxgg5IvL3nB6ackAdqxe7-CNkmWDvtYE-keuXI/preview?rm=minimal');
-});
+// index.htmlとscript.jsに同様の定義がありました
+// 二重で呼び出しているので、index.htmlのhtml要素のonclick属性（イベント属性）に記述をまとめたほうがよいでしょう
+// index.htmlで呼び出していたURLとscript.jsで呼び出しているURLが微妙に違うようなので、意図と合っているが動作を確認されてみてください。
 
-// ✅ 当直管理表を開くクリックイベント（新規追加）
-document.getElementById('duty-management-card').addEventListener('click', function() {
-    window.open('https://docs.google.com/spreadsheets/d/e/2PACX-1vTfU1BN4pPg9rY9INF2Kea_OIq1Bya875QFvAmi87uRGYw1t3pH69Lx0msXIbbLtZ0XZqYMtJYsrIrR/pubhtml?gid=0&single=true');
-});
+// // ✅ 手術台帳を開くクリックイベント
+// document.getElementById('surgery-register-card').addEventListener('click', function () {
+//     window.open('https://docs.google.com/spreadsheets/d/1CHU8Cgxgg5IvL3nB6ackAdqxe7-CNkmWDvtYE-keuXI/preview?rm=minimal');
+// });
 
-// ✅ 新型コロナ感染状況を開くクリックイベント（新規追加）
-document.getElementById('covid-status-card').addEventListener('click', function() {
-    window.open('https://docs.google.com/spreadsheets/d/1pgLCwJPxPpGO_-ro_J78QYqLzjrGHgTBKHL3ngybBbY/edit?gid=0#gid=0');
-});
+// // ✅ 当直管理表を開くクリックイベント（新規追加）
+// document.getElementById('duty-management-card').addEventListener('click', function () {
+//     window.open('https://docs.google.com/spreadsheets/d/e/2PACX-1vTfU1BN4pPg9rY9INF2Kea_OIq1Bya875QFvAmi87uRGYw1t3pH69Lx0msXIbbLtZ0XZqYMtJYsrIrR/pubhtml?gid=0&single=true');
+// });
 
-// ✅ メディサイナスイメージを開くクリックイベント（新規追加）
-document.getElementById('new-card').addEventListener('click', function() {
-    window.open('https://docs.google.com/spreadsheets/d/16G6LfsDQSD_ogAPDSj6cL4LpVGWFsZxnhdp_GfZA7e8/preview?rm=minimal');
-});
+// // ✅ 新型コロナ感染状況を開くクリックイベント（新規追加）
+// document.getElementById('covid-status-card').addEventListener('click', function () {
+//     window.open('https://docs.google.com/spreadsheets/d/1pgLCwJPxPpGO_-ro_J78QYqLzjrGHgTBKHL3ngybBbY/edit?gid=0#gid=0');
+// });
+
+// // ✅ メディサイナスイメージを開くクリックイベント（新規追加）
+// document.getElementById('new-card').addEventListener('click', function () {
+//     window.open('https://docs.google.com/spreadsheets/d/16G6LfsDQSD_ogAPDSj6cL4LpVGWFsZxnhdp_GfZA7e8/preview?rm=minimal');
+// });
 
 
 // ✅ グラフ作成関数（フォントサイズを動的に変更）
@@ -147,17 +151,17 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
     let screenWidth = window.innerWidth;
     let titleFontSize, axisTitleFontSize, axisLabelFontSize;
 
-    if (screenWidth > 1200) { 
+    if (screenWidth > 1200) {
         // PC向け
         titleFontSize = 62;
         axisTitleFontSize = 46;
         axisLabelFontSize = 40;
-    } else if (screenWidth > 768) { 
+    } else if (screenWidth > 768) {
         // タブレット向け
         titleFontSize = 25;
         axisTitleFontSize = 18;
         axisLabelFontSize = 16;
-    } else { 
+    } else {
         // スマホ向け
         titleFontSize = 25;
         axisTitleFontSize = 18;
@@ -182,9 +186,9 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                title: { 
-                    display: true, 
-                    text: label, 
+                title: {
+                    display: true,
+                    text: label,
                     font: { size: titleFontSize } // ✅ `weight` を削除
                 }
             },
@@ -192,15 +196,15 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
                 y: {
                     beginAtZero: true,
                     max: maxY,
-                    title: { 
-                        display: true, 
-                        text: unit, 
-                        font: { size: axisTitleFontSize } 
+                    title: {
+                        display: true,
+                        text: unit,
+                        font: { size: axisTitleFontSize }
                     },
                     ticks: { font: { size: axisLabelFontSize } }
                 },
-                x: { 
-                    ticks: { font: { size: axisLabelFontSize } } 
+                x: {
+                    ticks: { font: { size: axisLabelFontSize } }
                 }
             }
         }
@@ -228,6 +232,16 @@ function formatTime(dateString) {
 function formatDateForChart(dateString) {
     const date = new Date(dateString);
     return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+// カードをクリックして新しく開く部分のコードは、URL以外は定義の変わらないコートです
+// script.js内にopenExternalLink()を記述しました。
+// イベントハンドラはDOM（id要素を示すセレクタ）からだけでなく、HTML属性内に記述することができます
+// clickイベントの場合はhtml要素のonclick属性としてJavaScriptの式を呼び出すことができます。
+// コードリファクタリングの観点から、今回はhtml要素のonClick属性を使うほうがスマートでしょう。
+
+function openExternalLink(url) {
+    window.open(url, '_blank');
 }
 
 // ✅ 初期化
