@@ -1,20 +1,49 @@
-// ✅ ダッシュボードのデータ取得 & グラフ表示用 API
-const apiUrl = "https://script.google.com/macros/s/AKfycbwor8y2k5p2zXUcIj7rBnyn3Z_V4cTyEgcyGzGnvy_VgAjam2ymmMFJNy0xUvnTuzjt/exec";
+// 今後の展開を踏まえて、まずはURLエンドポイントを定数として書き出しましょう。
+const API_CONFIG_URL = {
+    // ダッシュボードのデータ取得 & グラフ表示用 API
+    'kyoritsu-dashboard': "https://script.google.com/macros/s/AKfycbwor8y2k5p2zXUcIj7rBnyn3Z_V4cTyEgcyGzGnvy_VgAjam2ymmMFJNy0xUvnTuzjt/exec",
+    'special-data': "https://script.google.com/macros/s/AKfycbyPikpNs-C043HCh9cLPIggbiZIgep44d31os8nCJtZPZz0KASzugNNbcVxThDRnjtfWA/exec"
+}
 
-// ✅ 「水曜会」「経営戦略室の戦略」用 API
-const specialDataApiUrl = "https://script.google.com/macros/s/AKfycbyPikpNs-C043HCh9cLPIggbiZIgep44d31os8nCJtZPZz0KASzugNNbcVxThDRnjtfWA/exec";
+// メモ：今回はこれまでの文法の構造を維持するため、apiUrl、specialDataApiUrlはそのまま使います。
+const apiUrl = API_CONFIG_URL['kyoritsu-dashboard'];
+const specialDataApiUrl = API_CONFIG_URL['special-data'];
+
+// 「水曜会や経営戦略室の戦略」「共立病院ダッシュボード」のデータ取得には、
+// 共通してfetchAPIを用いています。処理の手順もほぼ同様です。
+// まずはこのデータ取得部分のみをまとめて、関数に切り出してみましょう。
+// fetchAPIによるURLの呼び出しには時間がかかります。
+// この処理は非同期なのでasync関数としてください。fetchApiData関数を定義します。
+
+// fetchApiData関数は、取得したいデータのurlを指定します。
+// 第2引数の内容はoptions.*（のキーワード引数）としてfetchAPI取得のオプションとして渡されます。
+async function fetchApiData(url, options = {}) {
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`HTTP エラー: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("❌ データ取得エラー:", error);
+        throw error;
+    }
+}
 
 // ✅ 「水曜会」「経営戦略室の戦略」のデータ取得
 async function fetchSpecialData() {
     try {
         console.log("Fetching Special Data...");
-        const response = await fetch(specialDataApiUrl);
+        // 先ほど追加したfetchApiDataを用います
+        const result = await fetchApiData(specialDataApiUrl);
+        // -- ↓ 元のこの定義はfetchAPiDataで行われます
+        // const response = await fetch(specialDataApiUrl);
 
-        if (!response.ok) {
-            throw new Error(`HTTP エラー: ${response.status}`);
-        }
+        // if (!response.ok) {
+        //     throw new Error(`HTTP エラー: ${response.status}`);
+        // }
 
-        const result = await response.json();
+        // const result = await response.json();
         console.log("Special Data Response:", result);
 
         if (!result || !result.specialData) {
@@ -50,12 +79,15 @@ async function fetchSpecialData() {
 // ✅ データ取得 & グラフ表示
 async function fetchData() {
     try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP エラー: ${response.status}`);
-        }
-
-        const result = await response.json();
+        console.log("Fetching Data...");
+        // 元の実装 ---
+        // const response = await fetch(apiUrl);
+        // if (!response.ok) {
+        //     throw new Error(`HTTP エラー: ${response.status}`);
+        // }
+        
+        // fetchApiDataで取得するよう（置き換えます）
+        const result = await fetchApiData(apiUrl);
         console.log("API Response:", result);
 
         if (!result || !result.data || result.data.length === 0) {
