@@ -91,17 +91,21 @@ async function fetchSpecialData() {
 //  　　　 <div style="text-align:left; font-size:24px; margin-top:10px;">・R8年度診療報酬改定に向けて議論がスタート<br>
 //    　　 （急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室)<br>＊画像診断センター調査終了しました！</div>`;
 
+        // よほどの必要性がない限り、JavaScript側からのstyle属性変更は避けたほうがいいです
+        // （CSS: style.cssの定義と衝突します）
+
+        // → style.cssの定義を変更します
 
 
-        // ✅ 水曜会カードのサイズを変更（横幅と高さを指定）
-        document.getElementById("suiyokai-card").style.width = "680px";  // 横幅
-        document.getElementById("suiyokai-card").style.height = "220px"; // 高さ
-        document.getElementById("suiyokai-card").style.textAlign = "left"; // 左詰め表示
+        // // ✅ 水曜会カードのサイズを変更（横幅と高さを指定）
+        // document.getElementById("suiyokai-card").style.width = "680px";  // 横幅
+        // document.getElementById("suiyokai-card").style.height = "220px"; // 高さ
+        // document.getElementById("suiyokai-card").style.textAlign = "left"; // 左詰め表示
 
-        // ✅ 経営戦略カードのサイズを変更（横幅と高さを指定）
-        document.getElementById("keiei-card").style.width = "680px";  // 横幅
-        document.getElementById("keiei-card").style.height = "220px"; // 高さ
-        document.getElementById("keiei-card").style.textAlign = "left"; // 左詰め表示
+        // // ✅ 経営戦略カードのサイズを変更（横幅と高さを指定）
+        // document.getElementById("keiei-card").style.width = "680px";  // 横幅
+        // document.getElementById("keiei-card").style.height = "220px"; // 高さ
+        // document.getElementById("keiei-card").style.textAlign = "left"; // 左詰め表示
 
 
     } catch (error) {

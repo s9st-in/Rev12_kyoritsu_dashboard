@@ -143,7 +143,10 @@ canvas {
 
 /* ✅ 変数を定義（カードのサイズを自由に変更可能に） */
 :root {
-    --header-card-width: 700px;  /* ★ デフォルトの横幅（自由に変更可） */
+    /* これまではJavaScript側で設定していたstyle属性でwidthを680pxにしていました */
+    /* JavaScript側で設定していたstyle属性を削除すると、こちらの値が参照されます */
+    /* --header-card-width: 700px; */
+    --header-card-width: 680px; /* ★ デフォルトの横幅（自由に変更可） */
     --header-card-height: 220px; /* ★ デフォルトの縦幅（自由に変更可） */
 }
 
