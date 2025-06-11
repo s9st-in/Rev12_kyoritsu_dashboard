@@ -285,8 +285,11 @@ function openExternalLink(url) {
 fetchData();
 fetchSpecialData();  // ✅ 「水曜会」「経営戦略室の戦略」のデータ取得も実行
 
+
+// よほどの必要性がない限り、JavaScript側からのstyle属性変更は避けたほうがいいです
+// // （CSS: style.cssの定義と衝突します）
 // ✅ タイトルのフォントサイズ変更
-document.querySelector("h1.left-align").style.fontSize = "32px"; // ← フォントサイズを変更
+// document.querySelector("h1.left-align").style.fontSize = "32px"; // ← フォントサイズを変更
 
 
 

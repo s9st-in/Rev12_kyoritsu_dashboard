@@ -164,6 +164,11 @@ canvas {
     margin-right: 50px;
 }
 
+/* script.jsにあった定義を削除したので、こちらで定義します */
+.header-left h1 {
+    font-size: 32px;
+}
+
 /* ✅ ヘッダー内のカードを右端に寄せる */
 .header-cards {
     display: flex;
