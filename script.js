@@ -1,22 +1,21 @@
-// 今後の展開を踏まえて、まずはURLエンドポイントを定数として書き出しましょう。
 const API_CONFIG_URL = {
     // ダッシュボードのデータ取得 & グラフ表示用 API
     'kyoritsu-dashboard': "https://script.google.com/macros/s/AKfycbwor8y2k5p2zXUcIj7rBnyn3Z_V4cTyEgcyGzGnvy_VgAjam2ymmMFJNy0xUvnTuzjt/exec",
+    // 「水曜会」データ取得用 API
     'special-data': "https://script.google.com/macros/s/AKfycbyPikpNs-C043HCh9cLPIggbiZIgep44d31os8nCJtZPZz0KASzugNNbcVxThDRnjtfWA/exec"
 }
 
-// メモ：今回はこれまでの文法の構造を維持するため、apiUrl、specialDataApiUrlはそのまま使います。
 const apiUrl = API_CONFIG_URL['kyoritsu-dashboard'];
 const specialDataApiUrl = API_CONFIG_URL['special-data'];
 
-// 「水曜会や経営戦略室の戦略」「共立病院ダッシュボード」のデータ取得には、
-// 共通してfetchAPIを用いています。処理の手順もほぼ同様です。
-// まずはこのデータ取得部分のみをまとめて、関数に切り出してみましょう。
-// fetchAPIによるURLの呼び出しには時間がかかります。
-// この処理は非同期なのでasync関数としてください。fetchApiData関数を定義します。
 
-// fetchApiData関数は、取得したいデータのurlを指定します。
-// 第2引数の内容はoptions.*（のキーワード引数）としてfetchAPI取得のオプションとして渡されます。
+/**
+ * 指定されたURLからデータを取得してJSONとして返す
+ * @param {string} url - データを取得するURL
+ * @param {Object} options - fetchのオプション設定
+ * @returns {Promise<Object>} 取得したJSONデータ
+ * @throws {Error} HTTP通信エラーまたはJSONパースエラー時
+ */
 async function fetchApiData(url, options = {}) {
     try {
         const response = await fetch(url, options);
@@ -34,16 +33,9 @@ async function fetchApiData(url, options = {}) {
 async function fetchSpecialData() {
     try {
         console.log("Fetching Special Data...");
-        // 先ほど追加したfetchApiDataを用います
+
         const result = await fetchApiData(specialDataApiUrl);
-        // -- ↓ 元のこの定義はfetchAPiDataで行われます
-        // const response = await fetch(specialDataApiUrl);
 
-        // if (!response.ok) {
-        //     throw new Error(`HTTP エラー: ${response.status}`);
-        // }
-
-        // const result = await response.json();
         console.log("Special Data Response:", result);
 
         if (!result || !result.specialData) {
@@ -80,13 +72,7 @@ async function fetchSpecialData() {
 async function fetchData() {
     try {
         console.log("Fetching Data...");
-        // 元の実装 ---
-        // const response = await fetch(apiUrl);
-        // if (!response.ok) {
-        //     throw new Error(`HTTP エラー: ${response.status}`);
-        // }
-        
-        // fetchApiDataで取得するよう（置き換えます）
+
         const result = await fetchApiData(apiUrl);
         console.log("API Response:", result);
 
@@ -144,31 +130,6 @@ async function fetchData() {
         console.error("❌ データ取得エラー:", error);
     }
 }
-
-// index.htmlとscript.jsに同様の定義がありました
-// 二重で呼び出しているので、index.htmlのhtml要素のonclick属性（イベント属性）に記述をまとめたほうがよいでしょう
-// index.htmlで呼び出していたURLとscript.jsで呼び出しているURLが微妙に違うようなので、意図と合っているが動作を確認されてみてください。
-
-// // ✅ 手術台帳を開くクリックイベント
-// document.getElementById('surgery-register-card').addEventListener('click', function () {
-//     window.open('https://docs.google.com/spreadsheets/d/1CHU8Cgxgg5IvL3nB6ackAdqxe7-CNkmWDvtYE-keuXI/preview?rm=minimal');
-// });
-
-// // ✅ 当直管理表を開くクリックイベント（新規追加）
-// document.getElementById('duty-management-card').addEventListener('click', function () {
-//     window.open('https://docs.google.com/spreadsheets/d/e/2PACX-1vTfU1BN4pPg9rY9INF2Kea_OIq1Bya875QFvAmi87uRGYw1t3pH69Lx0msXIbbLtZ0XZqYMtJYsrIrR/pubhtml?gid=0&single=true');
-// });
-
-// // ✅ 新型コロナ感染状況を開くクリックイベント（新規追加）
-// document.getElementById('covid-status-card').addEventListener('click', function () {
-//     window.open('https://docs.google.com/spreadsheets/d/1pgLCwJPxPpGO_-ro_J78QYqLzjrGHgTBKHL3ngybBbY/edit?gid=0#gid=0');
-// });
-
-// // ✅ メディサイナスイメージを開くクリックイベント（新規追加）
-// document.getElementById('new-card').addEventListener('click', function () {
-//     window.open('https://docs.google.com/spreadsheets/d/16G6LfsDQSD_ogAPDSj6cL4LpVGWFsZxnhdp_GfZA7e8/preview?rm=minimal');
-// });
-
 
 // ✅ グラフ作成関数（フォントサイズを動的に変更）
 function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
@@ -265,12 +226,6 @@ function formatDateForChart(dateString) {
     const date = new Date(dateString);
     return `${date.getMonth() + 1}/${date.getDate()}`;
 }
-
-// カードをクリックして新しく開く部分のコードは、URL以外は定義の変わらないコートです
-// script.js内にopenExternalLink()を記述しました。
-// イベントハンドラはDOM（id要素を示すセレクタ）からだけでなく、HTML属性内に記述することができます
-// clickイベントの場合はhtml要素のonclick属性としてJavaScriptの式を呼び出すことができます。
-// コードリファクタリングの観点から、今回はhtml要素のonClick属性を使うほうがスマートでしょう。
 
 function openExternalLink(url) {
     window.open(url, '_blank');
