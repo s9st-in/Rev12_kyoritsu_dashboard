@@ -14,7 +14,9 @@ h1 {
 }
 
 .date-display {
-    font-size: 28px;
+    /* これまではJavaScript側で設定していたstyle属性でfont-sizeを30pxにしていました */
+    font-size: 30px;
+    /* font-size: 28px; */
     margin: 10px 0;
     font-weight: bold;
     text-align: left; /* 左寄せ */
@@ -55,6 +57,11 @@ h1.left-align {
     flex-direction: column;
     justify-content: center;
     transition: background-color 0.3s ease-in-out; /* ✅ 色変化のアニメーション */
+}
+
+/* これまではJavaScript側で設定していたstyle属性でfont-sizeを28pxにしていました */
+.dashboard .card {
+    font-size: 28px;
 }
 
 .card h3 {

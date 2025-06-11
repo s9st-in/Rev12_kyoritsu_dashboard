@@ -129,13 +129,15 @@ function describeFetchData(result) {
     // 更新時刻を確実に表示
     document.getElementById("latest-date").innerHTML = `${formattedDate}<br><span class="update-time">更新時刻：${formattedTime}</span>`;
 
+    // よほどの必要性がない限り、JavaScript側からのstyle属性変更は避けたほうがいいです
+    // （CSS: style.cssの定義と衝突します）
     // フォントサイズを大きく
-    document.getElementById("latest-date").style.fontSize = "30px";
+    // document.getElementById("latest-date").style.fontSize = "30px";
 
     // ダッシュボードデータの表示
-    document.querySelectorAll(".dashboard .card").forEach(card => {
-        card.style.fontSize = "28px";
-    });
+    // document.querySelectorAll(".dashboard .card").forEach(card => {
+    //     card.style.fontSize = "28px";
+    // });
 
     document.querySelector(".dashboard .card:nth-child(1) strong").innerText = `${(latestData["病床利用率 (%)"] * 100).toFixed(1)}%`;
     document.querySelector(".dashboard .card:nth-child(2) strong").innerText = `${latestData["救急車搬入数"]}台`;
