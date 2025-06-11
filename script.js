@@ -29,6 +29,43 @@ async function fetchApiData(url, options = {}) {
     }
 }
 
+
+// 関数は必要以上に長くならないよう、責務を考えつつ分割するのが基本です
+// 今回は「ダッシュボード」「水曜会」のDOM描画に用いる部分をそれぞれ分割してみましょう
+
+
+// document.getElementById("suiyokai-card").innerHTML = `<strong>『水曜会 Top Down!』</strong><br>${result.specialData.suiyokai || "データなし"}`;
+//         document.getElementById("keiei-card").innerHTML = `<div style="text-align:center; font-size:32px; font-weight:bold;">『お知らせ』</div>
+//  　　　 <div style="text-align:left; font-size:24px; margin-top:10px;">・R8年度診療報酬改定に向けて議論がスタート<br>
+//    　　 （急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室)<br>＊画像診断センター調査終了しました！</div>`;
+
+// 後で困ったことになるので、document.getElementByIdで取得したDOMノードが先にいったん変数に格納してしまいましょう。
+
+// document.getElementById().innerHTMLで挿入するHTMLは関数で取得できるようにしましょう
+// -- createSuiyoukaiCardContent関数 … 水曜会
+// -- createKeieiCardContent関数 … 経営戦略室
+
+// dataはresult.specialData.suiyokai（水曜会のデータ）を期待しています
+function createSuiyokaiCardContent(data) {
+    return `<strong>『水曜会 Top Down!』</strong><br>${data || "データなし"}`
+}
+
+function createKeieiCardContent() {
+    return `<div style="text-align:center; font-size:32px; font-weight:bold;">『お知らせ』</div><div style="text-align:left; font-size:24px; margin-top:10px;">・R8年度診療報酬改定に向けて議論がスタート<br>（急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室)<br>＊画像診断センター調査終了しました！</div>`;
+}
+
+function describeSpecialData(data) {
+
+    // -- DOM要素を探してくる部分と、.innerHTMLで注入する部分を分けます
+
+    const suiyokaiCardElement = document.getElementById("suiyokai-card");
+    const keieiCardElement = document.getElementById("keiei-card");
+
+    suiyokaiCardElement.innerHTML = createSuiyokaiCardContent(data.suiyokai);
+    keieiCardElement.innerHTML = createKeieiCardContent();
+    
+}
+
 // ✅ 「水曜会」「経営戦略室の戦略」のデータ取得
 async function fetchSpecialData() {
     try {
@@ -43,12 +80,16 @@ async function fetchSpecialData() {
             return;
         }
 
+        // --- describeSpecialData関数で描画します。データをresultで渡します。
+        describeSpecialData(result.specialData);
+
+
         // ✅ タイトルを維持しながらデータを左詰めで表示　　*2025.5.28 「経営戦略室より」を追加
         // ✅ 『』を追加し、左詰めに設定
-        document.getElementById("suiyokai-card").innerHTML = `<strong>『水曜会 Top Down!』</strong><br>${result.specialData.suiyokai || "データなし"}`;
-        document.getElementById("keiei-card").innerHTML = `<div style="text-align:center; font-size:32px; font-weight:bold;">『お知らせ』</div>
- 　　　 <div style="text-align:left; font-size:24px; margin-top:10px;">・R8年度診療報酬改定に向けて議論がスタート<br>
-   　　 （急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室)<br>＊画像診断センター調査終了しました！</div>`;
+//         document.getElementById("suiyokai-card").innerHTML = createSuiyokaiCardContent(result.specialData.suiyokai);
+//         document.getElementById("keiei-card").innerHTML = `<div style="text-align:center; font-size:32px; font-weight:bold;">『お知らせ』</div>
+//  　　　 <div style="text-align:left; font-size:24px; margin-top:10px;">・R8年度診療報酬改定に向けて議論がスタート<br>
+//    　　 （急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室)<br>＊画像診断センター調査終了しました！</div>`;
 
 
 
