@@ -30,27 +30,40 @@ async function fetchApiData(url, options = {}) {
 }
 
 
+/**
+ * 水曜会カードのコンテンツを生成する
+ * @param {string} data - 水曜会のデータ
+ * @returns {string} 生成されたHTMLコンテンツ
+ */
 function createSuiyokaiCardContent(data) {
     return `<strong>『水曜会 Top Down!』</strong><br>${data || "データなし"}`
 }
 
+/**
+ * 経営戦略室のお知らせカードのコンテンツを生成する
+ * @returns {string} 生成されたHTMLコンテンツ
+ */
 function createKeieiCardContent() {
     return `<div style="text-align:center; font-size:32px; font-weight:bold;">『お知らせ』</div><div style="text-align:left; font-size:24px; margin-top:10px;">・R8年度診療報酬改定に向けて議論がスタート<br>（急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室)<br>＊画像診断センター調査終了しました！</div>`;
 }
 
+/**
+ * 特別データ（水曜会と経営戦略室のお知らせ）をダッシュボードに表示する
+ * @param {Object} data - 表示する特別データ
+ * @param {string} data.suiyokai - 水曜会のデータ
+ */
 function describeSpecialData(data) {
-
-    // -- DOM要素を探してくる部分と、.innerHTMLで注入する部分を分けます
-
     const suiyokaiCardElement = document.getElementById("suiyokai-card");
     const keieiCardElement = document.getElementById("keiei-card");
 
     suiyokaiCardElement.innerHTML = createSuiyokaiCardContent(data.suiyokai);
     keieiCardElement.innerHTML = createKeieiCardContent();
-    
 }
 
-// ✅ 「水曜会」「経営戦略室の戦略」のデータ取得
+/**
+ * 特別データ（水曜会と経営戦略室のお知らせ）をAPIから取得する
+ * @returns {Promise<void>}
+ */
 async function fetchSpecialData() {
     try {
         console.log("Fetching Special Data...");
@@ -75,6 +88,12 @@ async function fetchSpecialData() {
 // -- desribeSpercialDataと同様に、
 // describeFecthData関数や埋め込むテンプレートを実装します
 
+/**
+ * APIから取得したデータをダッシュボードに表示する
+ * @param {Object} result - APIレスポンスデータ
+ * @param {Array<Object>} result.data - 時系列データの配列
+ * @param {string} result.lastEditTime - 最終更新時刻
+ */
 function describeFetchData(result) {
     const latestData = result.data[result.data.length - 1];
 
@@ -132,6 +151,37 @@ async function fetchData() {
     }
 }
 
+// おそらくですが、フォントサイズの設定が逆向き（パソコンが小さく、タブレット→スマホに行けば大きくしたい）という意図に見えます
+function getCanvasResponsiveFontSize() {
+
+    // 画面幅を取得
+    const screenWidth = window.innerWidth;
+
+    // 画面幅に応じてフォントサイズを返す
+    if (screenWidth > 1200) {
+        // PC向け
+        return {
+            titleFontSize: 62,
+            axisTitleFontSize: 46,
+            axisLabelFontSize: 40
+        };
+    } else if (screenWidth > 768) {
+        // タブレット向け
+        return {
+            titleFontSize: 25,
+            axisTitleFontSize: 18,
+            axisLabelFontSize: 16
+        };
+    } else {
+        // スマホ向け
+        return {
+            titleFontSize: 25,
+            axisTitleFontSize: 18,
+            axisLabelFontSize: 16
+        };
+    }
+}
+
 // ✅ グラフ作成関数（フォントサイズを動的に変更）
 function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
     const canvas = document.getElementById(canvasId);
@@ -141,26 +191,36 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
         canvas.chartInstance.destroy();
     }
 
-    // ✅ 画面幅に応じたフォントサイズの調整（適切な範囲で変更）
-    let screenWidth = window.innerWidth;
-    let titleFontSize, axisTitleFontSize, axisLabelFontSize;
+    // screenWidthの取得とtitleFontSize, axisTitleFontsize, axisLabelFontSizeは
+    // 画面幅を取得しそれらに応じてフォントサイズを返す関数に変更したほうが良いです
 
-    if (screenWidth > 1200) {
-        // PC向け
-        titleFontSize = 62;
-        axisTitleFontSize = 46;
-        axisLabelFontSize = 40;
-    } else if (screenWidth > 768) {
-        // タブレット向け
-        titleFontSize = 25;
-        axisTitleFontSize = 18;
-        axisLabelFontSize = 16;
-    } else {
-        // スマホ向け
-        titleFontSize = 25;
-        axisTitleFontSize = 18;
-        axisLabelFontSize = 16;
-    }
+    // getCanvasResponsiveFontSize関数を使用してフォントサイズを取得します
+    // const の後に{*,*}と続けると配列で返したキーにある変数を取得できます
+    // これは分割代入と呼ばれるものです：（よく使われます）
+    // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Destructuring
+    const { titleFontSize, axisTitleFontSize, axisLabelFontSize } = getCanvasResponsiveFontSize();
+
+
+    // ✅ 画面幅に応じたフォントサイズの調整（適切な範囲で変更）
+    // let screenWidth = window.innerWidth;
+    // let titleFontSize, axisTitleFontSize, axisLabelFontSize;
+
+    // if (screenWidth > 1200) {
+    //     // PC向け
+    //     titleFontSize = 62;
+    //     axisTitleFontSize = 46;
+    //     axisLabelFontSize = 40;
+    // } else if (screenWidth > 768) {
+    //     // タブレット向け
+    //     titleFontSize = 25;
+    //     axisTitleFontSize = 18;
+    //     axisLabelFontSize = 16;
+    // } else {
+    //     // スマホ向け
+    //     titleFontSize = 25;
+    //     axisTitleFontSize = 18;
+    //     axisLabelFontSize = 16;
+    // }
 
     // ✅ 新しいグラフを作成し、インスタンスを保存
     canvas.chartInstance = new Chart(canvas, {

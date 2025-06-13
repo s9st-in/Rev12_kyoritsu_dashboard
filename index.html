@@ -90,15 +90,40 @@
     </div>
 
     <div class="charts-grid">
-        <canvas id="bedChart"></canvas>
-        <canvas id="ambulanceChart"></canvas>
-        <canvas id="inpatientsChart"></canvas>
-        <canvas id="dischargesChart"></canvas>
-        <canvas id="generalWardChart"></canvas>
-        <canvas id="icuChart"></canvas>
+        <!--
+        Chart.jsのグラフを表示するcanvas要素のサイズ計算の不具合
 
-        <canvas id="averageStayChart"></canvas>
+        Chart.jsが独自にcanvas要素のサイズを計算し、CSSの設定を上書きしているため、描画・表示が正しく行われていません。
+        例えば、パソコン幅（1200px）の場合、大まかに横に3分割しているので、400pxずつのグラフが描画されると期待しているのですが
+        実際には、1200pxの幅のグラフが描画されており、その上でCSS側で設定した3分割した幅とグラフの高さの指定で強制的に縮小されてしまっています
+        そのためグラフの縮尺が合っておらず、描画がガタガタになっており、また線や文字の太さが本来より細くなっています。
+        なお、パソコン表示で特にこの不具合が顕著に出ており、視認性を損ねていると評価します。
 
+        Chart.jsは、canvas要素の親要素のサイズを元に、canvas要素のサイズを決定しています。
+        ここでは簡単に考えて、canvas要素を囲うdiv要素（class="chart-container")を作成することにします。
+        
+        -->
+        <div class="chart-container">
+            <canvas id="bedChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="ambulanceChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="inpatientsChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="dischargesChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="generalWardChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="icuChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="averageStayChart"></canvas>
+        </div>
     </div>
 
     <script src="script.js"></script>
