@@ -30,22 +30,6 @@ async function fetchApiData(url, options = {}) {
 }
 
 
-// 関数は必要以上に長くならないよう、責務を考えつつ分割するのが基本です
-// 今回は「ダッシュボード」「水曜会」のDOM描画に用いる部分をそれぞれ分割してみましょう
-
-
-// document.getElementById("suiyokai-card").innerHTML = `<strong>『水曜会 Top Down!』</strong><br>${result.specialData.suiyokai || "データなし"}`;
-//         document.getElementById("keiei-card").innerHTML = `<div style="text-align:center; font-size:32px; font-weight:bold;">『お知らせ』</div>
-//  　　　 <div style="text-align:left; font-size:24px; margin-top:10px;">・R8年度診療報酬改定に向けて議論がスタート<br>
-//    　　 （急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室)<br>＊画像診断センター調査終了しました！</div>`;
-
-// 後で困ったことになるので、document.getElementByIdで取得したDOMノードが先にいったん変数に格納してしまいましょう。
-
-// document.getElementById().innerHTMLで挿入するHTMLは関数で取得できるようにしましょう
-// -- createSuiyoukaiCardContent関数 … 水曜会
-// -- createKeieiCardContent関数 … 経営戦略室
-
-// dataはresult.specialData.suiyokai（水曜会のデータ）を期待しています
 function createSuiyokaiCardContent(data) {
     return `<strong>『水曜会 Top Down!』</strong><br>${data || "データなし"}`
 }
@@ -83,31 +67,6 @@ async function fetchSpecialData() {
         // --- describeSpecialData関数で描画します。データをresultで渡します。
         describeSpecialData(result.specialData);
 
-
-        // ✅ タイトルを維持しながらデータを左詰めで表示　　*2025.5.28 「経営戦略室より」を追加
-        // ✅ 『』を追加し、左詰めに設定
-//         document.getElementById("suiyokai-card").innerHTML = createSuiyokaiCardContent(result.specialData.suiyokai);
-//         document.getElementById("keiei-card").innerHTML = `<div style="text-align:center; font-size:32px; font-weight:bold;">『お知らせ』</div>
-//  　　　 <div style="text-align:left; font-size:24px; margin-top:10px;">・R8年度診療報酬改定に向けて議論がスタート<br>
-//    　　 （急性期医療に関するテーマ）<br>・電子カルテ付属システム調査開始(DX推進室)<br>＊画像診断センター調査終了しました！</div>`;
-
-        // よほどの必要性がない限り、JavaScript側からのstyle属性変更は避けたほうがいいです
-        // （CSS: style.cssの定義と衝突します）
-
-        // → style.cssの定義を変更します
-
-
-        // // ✅ 水曜会カードのサイズを変更（横幅と高さを指定）
-        // document.getElementById("suiyokai-card").style.width = "680px";  // 横幅
-        // document.getElementById("suiyokai-card").style.height = "220px"; // 高さ
-        // document.getElementById("suiyokai-card").style.textAlign = "left"; // 左詰め表示
-
-        // // ✅ 経営戦略カードのサイズを変更（横幅と高さを指定）
-        // document.getElementById("keiei-card").style.width = "680px";  // 横幅
-        // document.getElementById("keiei-card").style.height = "220px"; // 高さ
-        // document.getElementById("keiei-card").style.textAlign = "left"; // 左詰め表示
-
-
     } catch (error) {
         console.error("❌ 特別データ取得エラー:", error);
     }
@@ -128,16 +87,6 @@ function describeFetchData(result) {
 
     // 更新時刻を確実に表示
     document.getElementById("latest-date").innerHTML = `${formattedDate}<br><span class="update-time">更新時刻：${formattedTime}</span>`;
-
-    // よほどの必要性がない限り、JavaScript側からのstyle属性変更は避けたほうがいいです
-    // （CSS: style.cssの定義と衝突します）
-    // フォントサイズを大きく
-    // document.getElementById("latest-date").style.fontSize = "30px";
-
-    // ダッシュボードデータの表示
-    // document.querySelectorAll(".dashboard .card").forEach(card => {
-    //     card.style.fontSize = "28px";
-    // });
 
     document.querySelector(".dashboard .card:nth-child(1) strong").innerText = `${(latestData["病床利用率 (%)"] * 100).toFixed(1)}%`;
     document.querySelector(".dashboard .card:nth-child(2) strong").innerText = `${latestData["救急車搬入数"]}台`;
@@ -257,8 +206,6 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
 }
 
 
-
-
 // ✅ 日付フォーマット関数
 function formatDate(dateString) {
     if (!dateString) return "日付不明";
@@ -287,11 +234,6 @@ function openExternalLink(url) {
 fetchData();
 fetchSpecialData();  // ✅ 「水曜会」「経営戦略室の戦略」のデータ取得も実行
 
-
-// よほどの必要性がない限り、JavaScript側からのstyle属性変更は避けたほうがいいです
-// // （CSS: style.cssの定義と衝突します）
-// ✅ タイトルのフォントサイズ変更
-// document.querySelector("h1.left-align").style.fontSize = "32px"; // ← フォントサイズを変更
 
 
 
