@@ -204,10 +204,15 @@ function getCanvasResponsiveFontSize() {
  */
 function redrawAllCharts() {
     // データが存在しない場合は何もしない
-    if (!latestChartData) return;
+    if (!latestChartData) {
+        console.log('再描画スキップ - データがまだ読み込まれていません');
+        return;
+    }
 
+    console.log('グラフを再描画中...');
     // describeFetchData関数を再実行してグラフを再描画
     describeFetchData(latestChartData);
+    console.log('グラフの再描画が完了しました');
 }
 
 // ✅ グラフ作成関数（フォントサイズを動的に変更）
@@ -304,7 +309,9 @@ function debounce(fn, delay = 200) {
 }
 
 // リサイズ時は'resize'イベントを検知して、debounce関数で処理を遅らせつつ、redrawAllCharts関数を実行します
+// グラフが再描画されると console.logでログが出力されます
 window.addEventListener('resize', debounce(() => {
+    console.log('リサイズイベント発生 - グラフを再描画します');
     redrawAllCharts();
 }, 200));
 
