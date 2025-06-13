@@ -152,6 +152,8 @@ async function fetchData() {
 }
 
 // おそらくですが、フォントサイズの設定が逆向き（パソコンが小さく、タブレット→スマホに行けば大きくしたい）という意図に見えます
+// ここでの文字の単位はピクセルです（パソコン上の1pxとスマホ上の1pxは実寸としてサイズが違います）
+// ひとまずすべて同じフォントサイズにいったんそろえます
 function getCanvasResponsiveFontSize() {
 
     // 画面幅を取得
@@ -161,9 +163,12 @@ function getCanvasResponsiveFontSize() {
     if (screenWidth > 1200) {
         // PC向け
         return {
-            titleFontSize: 62,
-            axisTitleFontSize: 46,
-            axisLabelFontSize: 40
+            // titleFontSize: 62,
+            titleFontSize: 25,
+            // axisTitleFontSize: 46,
+            axisTitleFontSize: 18,
+            // axisLabelFontSize: 40
+            axisLabelFontSize: 16
         };
     } else if (screenWidth > 768) {
         // タブレット向け
@@ -264,6 +269,8 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
         }
     });
 }
+
+
 
 
 // ✅ 日付フォーマット関数
