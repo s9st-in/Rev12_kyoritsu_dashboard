@@ -8,6 +8,9 @@ const API_CONFIG_URL = {
 const apiUrl = API_CONFIG_URL['kyoritsu-dashboard'];
 const specialDataApiUrl = API_CONFIG_URL['special-data'];
 
+// グラフデータを保存する変数（リサイズ時の再描画用）
+let latestChartData = null;
+
 
 /**
  * 指定されたURLからデータを取得してJSONとして返す
@@ -95,6 +98,11 @@ async function fetchSpecialData() {
  * @param {string} result.lastEditTime - 最終更新時刻
  */
 function describeFetchData(result) {
+
+    // データを保存（リサイズ時の再描画用）
+    latestChartData = result;
+
+    // 最新のデータを取得
     const latestData = result.data[result.data.length - 1];
 
     // 更新時刻を確実に取得するように修正
@@ -187,6 +195,21 @@ function getCanvasResponsiveFontSize() {
     }
 }
 
+
+// このグラフ表示ではブラウザのリサイズに対応していません
+// そのためcanvas要素のサイズが変更された場合、グラフの描画がおかしくなってしまいます
+// 今回はブラウザのリサイズを検知→カード部分を再描画することにより、グラフの描画を再実行します
+/**
+ * すべてのグラフを再描画する関数
+ */
+function redrawAllCharts() {
+    // データが存在しない場合は何もしない
+    if (!latestChartData) return;
+
+    // describeFetchData関数を再実行してグラフを再描画
+    describeFetchData(latestChartData);
+}
+
 // ✅ グラフ作成関数（フォントサイズを動的に変更）
 function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
     const canvas = document.getElementById(canvasId);
@@ -270,7 +293,20 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
     });
 }
 
+// これはリサイズ時に描画を少し遅らせるための関数です
+// すなわちウィンドウの幅が変わりつづけている間は処理を遅らせて、描画のコストを減らします
+function debounce(fn, delay = 200) {
+    let timer = null;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+}
 
+// リサイズ時は'resize'イベントを検知して、debounce関数で処理を遅らせつつ、redrawAllCharts関数を実行します
+window.addEventListener('resize', debounce(() => {
+    redrawAllCharts();
+}, 200));
 
 
 // ✅ 日付フォーマット関数
