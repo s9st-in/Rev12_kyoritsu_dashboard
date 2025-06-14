@@ -88,9 +88,6 @@ async function fetchSpecialData() {
     }
 }
 
-// -- desribeSpercialDataと同様に、
-// describeFecthData関数や埋め込むテンプレートを実装します
-
 /**
  * APIから取得したデータをダッシュボードに表示する
  * @param {Object} result - APIレスポンスデータ
@@ -159,9 +156,6 @@ async function fetchData() {
     }
 }
 
-// おそらくですが、フォントサイズの設定が逆向き（パソコンが小さく、タブレット→スマホに行けば大きくしたい）という意図に見えます
-// ここでの文字の単位はピクセルです（パソコン上の1pxとスマホ上の1pxは実寸としてサイズが違います）
-// ひとまずすべて同じフォントサイズにいったんそろえます
 function getCanvasResponsiveFontSize() {
 
     // 画面幅を取得
@@ -196,9 +190,6 @@ function getCanvasResponsiveFontSize() {
 }
 
 
-// このグラフ表示ではブラウザのリサイズに対応していません
-// そのためcanvas要素のサイズが変更された場合、グラフの描画がおかしくなってしまいます
-// 今回はブラウザのリサイズを検知→カード部分を再描画することにより、グラフの描画を再実行します
 /**
  * すべてのグラフを再描画する関数
  */
@@ -224,36 +215,7 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
         canvas.chartInstance.destroy();
     }
 
-    // screenWidthの取得とtitleFontSize, axisTitleFontsize, axisLabelFontSizeは
-    // 画面幅を取得しそれらに応じてフォントサイズを返す関数に変更したほうが良いです
-
-    // getCanvasResponsiveFontSize関数を使用してフォントサイズを取得します
-    // const の後に{*,*}と続けると配列で返したキーにある変数を取得できます
-    // これは分割代入と呼ばれるものです：（よく使われます）
-    // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Destructuring
     const { titleFontSize, axisTitleFontSize, axisLabelFontSize } = getCanvasResponsiveFontSize();
-
-
-    // ✅ 画面幅に応じたフォントサイズの調整（適切な範囲で変更）
-    // let screenWidth = window.innerWidth;
-    // let titleFontSize, axisTitleFontSize, axisLabelFontSize;
-
-    // if (screenWidth > 1200) {
-    //     // PC向け
-    //     titleFontSize = 62;
-    //     axisTitleFontSize = 46;
-    //     axisLabelFontSize = 40;
-    // } else if (screenWidth > 768) {
-    //     // タブレット向け
-    //     titleFontSize = 25;
-    //     axisTitleFontSize = 18;
-    //     axisLabelFontSize = 16;
-    // } else {
-    //     // スマホ向け
-    //     titleFontSize = 25;
-    //     axisTitleFontSize = 18;
-    //     axisLabelFontSize = 16;
-    // }
 
     // ✅ 新しいグラフを作成し、インスタンスを保存
     canvas.chartInstance = new Chart(canvas, {
@@ -298,8 +260,6 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
     });
 }
 
-// これはリサイズ時に描画を少し遅らせるための関数です
-// すなわちウィンドウの幅が変わりつづけている間は処理を遅らせて、描画のコストを減らします
 function debounce(fn, delay = 200) {
     let timer = null;
     return (...args) => {
@@ -308,8 +268,6 @@ function debounce(fn, delay = 200) {
     };
 }
 
-// リサイズ時は'resize'イベントを検知して、debounce関数で処理を遅らせつつ、redrawAllCharts関数を実行します
-// グラフが再描画されると console.logでログが出力されます
 window.addEventListener('resize', debounce(() => {
     console.log('リサイズイベント発生 - グラフを再描画します');
     redrawAllCharts();
