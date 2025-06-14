@@ -156,9 +156,11 @@ async function fetchData() {
     }
 }
 
+/**
+ * 画面幅に応じたグラフのフォントサイズを返す
+ * @returns {Object} タイトル、軸タイトル、軸ラベルのフォントサイズを含むオブジェクト
+ */
 function getCanvasResponsiveFontSize() {
-
-    // 画面幅を取得
     const screenWidth = window.innerWidth;
 
     // 画面幅に応じてフォントサイズを返す
@@ -191,7 +193,8 @@ function getCanvasResponsiveFontSize() {
 
 
 /**
- * すべてのグラフを再描画する関数
+ * すべてのグラフを再描画する
+ * @returns {void}
  */
 function redrawAllCharts() {
     // データが存在しない場合は何もしない
@@ -260,6 +263,12 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
     });
 }
 
+/**
+ * 関数の実行を遅延させるデバウンス関数
+ * @param {Function} fn - 実行する関数
+ * @param {number} [delay=200] - 遅延時間（ミリ秒）
+ * @returns {Function} デバウンスされた関数
+ */
 function debounce(fn, delay = 200) {
     let timer = null;
     return (...args) => {
@@ -267,11 +276,6 @@ function debounce(fn, delay = 200) {
         timer = setTimeout(() => fn(...args), delay);
     };
 }
-
-window.addEventListener('resize', debounce(() => {
-    console.log('リサイズイベント発生 - グラフを再描画します');
-    redrawAllCharts();
-}, 200));
 
 
 // ✅ 日付フォーマット関数
@@ -302,6 +306,8 @@ function openExternalLink(url) {
 fetchData();
 fetchSpecialData();  // ✅ 「水曜会」「経営戦略室の戦略」のデータ取得も実行
 
-
-
-
+// グラフの描画時にリサイズイベントが発生した場合、グラフを再描画する
+window.addEventListener('resize', debounce(() => {
+    console.log('リサイズイベント発生 - グラフを再描画します');
+    redrawAllCharts();
+}, 200));
