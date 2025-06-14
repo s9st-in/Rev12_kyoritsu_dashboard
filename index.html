@@ -33,14 +33,21 @@
 <body>
 
     <!-- 今回は動作確認用として、この位置にVue.jsのコンテナを配置します-->
-    <!-- {{　fetchData["suiyoukai"] }} というテンプレートにした部分に、水曜会のデータ（HTML形式）の文字列が挿入されているのを確認できるでしょうか？-->
+    <!-- APIから取得したHTML形式のデータをパースしてもっとあてはめやすい形にすると… -->
     <div id="special-data-container">
         <!-- データが読み込まれていない場合はローディング表示、読み込まれた場合はデータを表示 -->
         <div v-if="!fetchData">
             <p>データを読み込み中...</p>
         </div>
         <div v-else>
-            <p>水曜会データ: {{ fetchData["suiyokai"] }}</p>
+            <dl>
+                <dt>ミッション</dt>
+                <dd>{{ suiyokaiStructedData.mission }}</dd>
+                <dt>説明</dt>
+                <dd v-for="description in suiyokaiStructedData.descriptions" :key="description">
+                    {{ description }}
+                </dd>
+            </dl>
         </div>
     </div>
 
@@ -141,6 +148,48 @@
                 // 取得したデータを保管するための変数を作成します
                 const fetchData = Vue.ref(null);
 
+                // 元のAPIのデータ形式（HTML形式）を扱いやすいようにjson化します（暫定的対応）
+                const suiyokaiStructedData = Vue.computed(() => {
+                    if (!fetchData.value || !fetchData.value.suiyokai) {
+                        return null;
+                    }
+
+                    try {
+                        // HTMLタグを除去して純粋なテキストを取得
+                        const textContent = fetchData.value.suiyokai
+                            .replace(/<br\s*\/?>/gi, '\n')  // <br>を改行に変換
+                            .replace(/<[^>]*>/g, '')        // その他のHTMLタグを除去
+                            .trim();
+
+                        // 改行で分割
+                        const lines = textContent.split('\n')
+                            .map(line => line.trim())
+                            .filter(line => line.length > 0);
+
+                        if (lines.length === 0) {
+                            return null;
+                        }
+
+                        // 最初の行はミッション、残りは説明
+                        const mission = lines[0];
+                        const descriptions = lines.slice(1)
+                            .map(line => line.replace(/^・/, '').trim()); // 先頭の「・」を除去
+
+                        return {
+                            mission: mission,
+                            descriptions: descriptions,
+                            originalHtml: fetchData.value.suiyokai
+                        };
+
+                    } catch (error) {
+                        console.error('水曜会データの構造化に失敗しました:', error);
+                        return {
+                            error: 'データの構造化に失敗しました',
+                            originalHtml: fetchData.value.suiyokai
+                        };
+                    }
+                });
+
                 const loadData = async () => {
                     try {
                         const result = await fetchApiData(API_CONFIG_URL['special-data']);
@@ -165,6 +214,7 @@
 
                 return {
                     fetchData,
+                    suiyokaiStructedData,
                 };
             }
         });
