@@ -89,6 +89,27 @@ async function fetchSpecialData() {
 }
 
 /**
+ * グラフのみを描画する関数
+ * @param {Object} result - APIレスポンスデータ
+ * @param {Array<Object>} result.data - 時系列データの配列
+ */
+function drawCharts(result) {
+    // グラフ描画（表示する期間を変更可能）
+    const daysToShow = 14;
+    const labels = result.data.slice(-daysToShow).map(item => formatDateForChart(item["日付"]));
+
+    createChart("bedChart", "病床利用率 (%)", labels, result.data.map(item => item["病床利用率 (%)"] * 100), "blue", "％", 110);
+    createChart("ambulanceChart", "救急車搬入数", labels, result.data.map(item => item["救急車搬入数"]), "red", "台");
+    createChart("inpatientsChart", "入院患者数", labels, result.data.map(item => item["入院患者数"]), "green", "人");
+    createChart("dischargesChart", "退院予定数", labels, result.data.map(item => item["退院予定数"]), "orange", "人");
+    createChart("generalWardChart", "一般病棟在院数", labels, result.data.map(item => item["一般病棟在院数"]), "purple", "床");
+    createChart("icuChart", "集中治療室在院数", labels, result.data.map(item => item["集中治療室在院数"]), "teal", "床");
+
+    // 平均在院日数のグラフを追加
+    createChart("averageStayChart", "平均在院日数", labels, result.data.slice(-daysToShow).map(item => item["平均在院日数"]), "darkblue", "日");
+}
+
+/**
  * APIから取得したデータをダッシュボードに表示する
  * @param {Object} result - APIレスポンスデータ
  * @param {Array<Object>} result.data - 時系列データの配列
@@ -120,19 +141,8 @@ function describeFetchData(result) {
     document.querySelector(".dashboard .card:nth-child(6) strong").innerText = `${latestData["集中治療室在院数"]}/16 床`;
     document.querySelector(".dashboard .card:nth-child(7) strong").innerText = `${latestData["平均在院日数"]}日`;
 
-    // グラフ描画（表示する期間を変更可能）
-    const daysToShow = 14;
-    const labels = result.data.slice(-daysToShow).map(item => formatDateForChart(item["日付"]));
-
-    createChart("bedChart", "病床利用率 (%)", labels, result.data.map(item => item["病床利用率 (%)"] * 100), "blue", "％", 110);
-    createChart("ambulanceChart", "救急車搬入数", labels, result.data.map(item => item["救急車搬入数"]), "red", "台");
-    createChart("inpatientsChart", "入院患者数", labels, result.data.map(item => item["入院患者数"]), "green", "人");
-    createChart("dischargesChart", "退院予定数", labels, result.data.map(item => item["退院予定数"]), "orange", "人");
-    createChart("generalWardChart", "一般病棟在院数", labels, result.data.map(item => item["一般病棟在院数"]), "purple", "床");
-    createChart("icuChart", "集中治療室在院数", labels, result.data.map(item => item["集中治療室在院数"]), "teal", "床");
-
-    // 平均在院日数のグラフを追加
-    createChart("averageStayChart", "平均在院日数", labels, result.data.slice(-daysToShow).map(item => item["平均在院日数"]), "darkblue", "日");
+    // グラフ描画を分離した関数で実行
+    drawCharts(result);
 }
 
 // ✅ データ取得 & グラフ表示
@@ -204,8 +214,8 @@ function redrawAllCharts() {
     }
 
     console.log('グラフを再描画中...');
-    // describeFetchData関数を再実行してグラフを再描画
-    describeFetchData(latestChartData);
+    // グラフのみを再描画（数値データの再表示は行わない）
+    drawCharts(latestChartData);
     console.log('グラフの再描画が完了しました');
 }
 
