@@ -298,6 +298,10 @@ function formatDateForChart(dateString) {
     return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
+/**
+ * 外部リンクを新しいタブで開く
+ * @param {string} url - 開くURL
+ */
 function openExternalLink(url) {
     window.open(url, '_blank');
 }
