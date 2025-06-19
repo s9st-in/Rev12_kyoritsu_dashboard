@@ -14,7 +14,9 @@ h1 {
 }
 
 .date-display {
-    font-size: 28px;
+    /* これまではJavaScript側で設定していたstyle属性でfont-sizeを30pxにしていました */
+    font-size: 30px;
+    /* font-size: 28px; */
     margin: 10px 0;
     font-weight: bold;
     text-align: left; /* 左寄せ */
@@ -55,6 +57,11 @@ h1.left-align {
     flex-direction: column;
     justify-content: center;
     transition: background-color 0.3s ease-in-out; /* ✅ 色変化のアニメーション */
+}
+
+/* これまではJavaScript側で設定していたstyle属性でfont-sizeを28pxにしていました */
+.dashboard .card {
+    font-size: 28px;
 }
 
 .card h3 {
@@ -143,7 +150,10 @@ canvas {
 
 /* ✅ 変数を定義（カードのサイズを自由に変更可能に） */
 :root {
-    --header-card-width: 700px;  /* ★ デフォルトの横幅（自由に変更可） */
+    /* これまではJavaScript側で設定していたstyle属性でwidthを680pxにしていました */
+    /* JavaScript側で設定していたstyle属性を削除すると、こちらの値が参照されます */
+    /* --header-card-width: 700px; */
+    --header-card-width: 680px; /* ★ デフォルトの横幅（自由に変更可） */
     --header-card-height: 220px; /* ★ デフォルトの縦幅（自由に変更可） */
 }
 
@@ -159,6 +169,11 @@ canvas {
 .header-left {
     flex-grow: 1;
     margin-right: 50px;
+}
+
+/* script.jsにあった定義を削除したので、こちらで定義します */
+.header-left h1 {
+    font-size: 32px;
 }
 
 /* ✅ ヘッダー内のカードを右端に寄せる */
