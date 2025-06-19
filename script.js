@@ -59,8 +59,13 @@ function describeSpecialData(data) {
     const suiyokaiCardElement = document.getElementById("suiyokai-card");
     const keieiCardElement = document.getElementById("keiei-card");
 
-    suiyokaiCardElement.innerHTML = createSuiyokaiCardContent(data.suiyokai);
-    keieiCardElement.innerHTML = createKeieiCardContent();
+    // DOM要素の存在確認
+    if (suiyokaiCardElement) {
+        suiyokaiCardElement.innerHTML = createSuiyokaiCardContent(data.suiyokai);
+    }
+    if (keieiCardElement) {
+        keieiCardElement.innerHTML = createKeieiCardContent();
+    }
 }
 
 /**
@@ -222,6 +227,12 @@ function redrawAllCharts() {
 // ✅ グラフ作成関数（フォントサイズを動的に変更）
 function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
     const canvas = document.getElementById(canvasId);
+    
+    // Canvas要素の存在確認
+    if (!canvas) {
+        console.warn(`⚠️ Canvas要素が見つかりません: ${canvasId}`);
+        return;
+    }
 
     // ✅ 既存のグラフがある場合は削除（エラー防止）
     if (canvas.chartInstance) {
