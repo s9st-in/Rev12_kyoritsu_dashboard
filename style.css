@@ -194,7 +194,7 @@ canvas {
     width: var(--header-card-width);  /* ★ 自由に変更できる横幅 */
     height: var(--header-card-height); /* ★ 自由に変更できる縦幅 */
     max-width: 100%;
-    text-align: center;
+    text-align: left;  /* 表示を修正 */
     font-size: 24px;
     font-weight: bold;
     display: flex;
