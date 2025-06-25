@@ -136,7 +136,7 @@ function describeFetchData(result) {
     const formattedDate = latestData["日付"] ? formatDate(latestData["日付"]) : "日付不明";
 
     // 更新時刻を確実に表示
-    document.getElementById("latest-date").innerHTML = `${formattedDate}<br><span class="update-time">更新時刻：${formattedTime}</span>`;
+    document.getElementById("latest-date").innerHTML = `${formattedDate}<span class="update-time">更新時刻：${formattedTime}</span>`;
 
     document.querySelector("[data-metric='bed-utilization'] strong").innerText = `${(latestData["病床利用率 (%)"] * 100).toFixed(1)}%`;
     document.querySelector("[data-metric='ambulance'] strong").innerText = `${latestData["救急車搬入数"]}台`;

@@ -17,21 +17,20 @@ h1 {
     /* これまではJavaScript側で設定していたstyle属性でfont-sizeを30pxにしていました */
     font-size: 30px;
     /* font-size: 28px; */
-    margin: 10px 0;
+    /* margin: 10px 0; */
     font-weight: bold;
     text-align: left; /* 左寄せ */
-    padding-left: 20px; /* 余白を調整 */
+    /* padding-left: 20px; 余白を調整 */
 }
 
 h1.left-align {
     text-align: left;
-    padding-left: 20px;
+    /* padding-left: 20px; */
 }
 
 .update-time {
     font-size: 24px;
     color: #666;
-    margin-left: 10px;
     font-weight: bold;
 }
 
