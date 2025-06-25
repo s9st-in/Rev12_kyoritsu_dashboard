@@ -1,140 +1,73 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>戸畑共立病院ダッシュボード</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- tailwindcssのユーティリティークラスは「.tw-*」のプレフィックスを付けて呼び出します -->
-    <!-- また今回はCSSから→TailwindCSSへのリフトアンドシフトを行う都合上、初期段階でベーススタイルを無効化します -->
-    <!-- <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            prefix: 'tw-',
-            corePlugins: {
-                preflight: false,
-            }
-        }
-    </script> -->
-
-    <!-- Vue.js(v3)をCDN経由で読み込む -->
-    <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
-    <!-- 今回は動作確認用として、この位置にVue.jsのコンテナを配置します-->
-    <!-- APIから取得したHTML形式のデータをパースしてもっとあてはめやすい形にすると… -->
-    <!-- <div id="special-data-container">
-        <div v-if="!fetchData">
-            <p>データを読み込み中...</p>
+<header>
+<div class="header-container">
+    <div class="header-container">
+        <div class="header-left">
+            <h1 class="left-align">戸畑共立病院<br>ダッシュボード</h1><br>
+            <div class="date-display" id="latest-date">2025年2月17日(月) <br><span class="update-time">更新時刻：00:00</span></div>
         </div>
-        <div v-else>
-            <dl>
-                <dt>ミッション</dt>
-                <dd>{{ suiyokaiStructedData.mission }}</dd>
-                <dt>説明</dt>
-                <dd v-for="description in suiyokaiStructedData.descriptions" :key="description">
-                    {{ description }}
-                </dd>
-            </dl>
+        <div class="header-cards">
+            <div class="card header-card" id="suiyokai-card"><h3>『水曜会 Top Down!』</h3></div>
+            <div class="card header-card" id="keiei-card"><h3>『お知らせ』</h3></div>
         </div>
-    </div> -->
+    </div>
+</header>
 
-    <header>
-        <div class="header-container">
-            <div class="header-container">
-                <div class="header-left">
-                    <h1 class="left-align">戸畑共立病院<br>ダッシュボード</h1><br>
-                    <div class="date-display" id="latest-date">2025年2月17日(月) <br><span
-                            class="update-time">更新時刻：00:00</span></div>
-                </div>
-                <div class="header-cards">
-                    <div class="card header-card" id="suiyokai-card">
-                        <h3>『水曜会 Top Down!』</h3>
-                    </div>
-                    <div class="card header-card" id="keiei-card">
-                        <h3>『お知らせ』</h3>
-                    </div>
-                </div>
-            </div>
-    </header>
-
-
+    
     <div class="dashboard">
-        <div class="card">
-            <h3>病床利用率</h3><strong>--%</strong>
-        </div>
-        <div class="card">
-            <h3>救急車搬入</h3><strong>--台</strong>
-        </div>
-        <div class="card">
-            <h3>入院患者</h3><strong>--人</strong>
-        </div>
-        <div class="card">
-            <h3>退院予定</h3><strong>--人</strong>
-        </div>
-        <div class="card">
-            <h3>一般病棟在院数</h3><strong>--/218 床</strong>
-        </div>
-        <div class="card">
-            <h3>集中治療室在院数</h3><strong>--/16 床</strong>
-        </div>
-        <div class="card">
-            <h3>平均在院日数</h3><strong>--日</strong>
-        </div>
-        <div class="card" id="surgery-register-card"
-            onclick="openExternalLink('https://docs.google.com/spreadsheets/d/1CHU8Cgxgg5IvL3nB6ackAdqxe7-CNkmWDvtYE-keuXI/edit')">
-            <h3>手術台帳</h3><strong>クリックして表示</strong>
-        </div>
-        <div class="card" id="duty-management-card"
-            onclick="openExternalLink('https://docs.google.com/spreadsheets/d/1EX0t4wpSJZkEkhZ38PUGIyZVMOeGOTNdy2OI3rb_CTc/edit')">
-            <h3>当直管理表</h3><strong>クリックして表示</strong>
-        </div>
-        <div class="card" id="covid-status-card"
-            onclick="openExternalLink('https://docs.google.com/spreadsheets/d/1pgLCwJPxPpGO_-ro_J78QYqLzjrGHgTBKHL3ngybBbY/edit?gid=0#gid=0')">
-            <h3>新型コロナ感染状況</h3><strong>クリックして表示</strong>
-        </div>
-
+        <div class="card"><h3>病床利用率</h3><strong>--%</strong></div>
+        <div class="card"><h3>救急車搬入</h3><strong>--台</strong></div>
+        <div class="card"><h3>入院患者</h3><strong>--人</strong></div>
+        <div class="card"><h3>退院予定</h3><strong>--人</strong></div>
+        <div class="card"><h3>一般病棟在院数</h3><strong>--/218 床</strong></div>
+        <div class="card"><h3>集中治療室在院数</h3><strong>--/16 床</strong></div>
+        <div class="card"><h3>平均在院日数</h3><strong>--日</strong></div>
+        <div class="card" id="surgery-register-card"><h3>手術台帳</h3><strong>クリックして表示</strong></div>
+        <div class="card" id="duty-management-card"><h3>当直管理表</h3><strong>クリックして表示</strong></div>
+        <div class="card" id="covid-status-card"><h3>新型コロナ感染状況</h3><strong>クリックして表示</strong></div>
         <!-- ✅ 新しく追加するメディサイナスカード -->
-        <div class="card" id="new-card"
-            onclick="openExternalLink('https://docs.google.com/spreadsheets/d/16G6LfsDQSD_ogAPDSj6cL4LpVGWFsZxnhdp_GfZA7e8/preview?rm=minimal')">
-            <strong><h3>『空床マップ』<br></h3><strong>クリックして表示</strong>
-        </div>
+        <div class="card" id="new-card"><strong>『空床マップ』<br></h3><strong>クリックして表示</strong></div>
     </div>
 
     <div class="charts-grid">
-        <div class="chart-container">
-            <canvas id="bedChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="ambulanceChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="inpatientsChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="dischargesChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="generalWardChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="icuChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="averageStayChart"></canvas>
-        </div>
+        <canvas id="bedChart"></canvas>
+        <canvas id="ambulanceChart"></canvas>
+        <canvas id="inpatientsChart"></canvas>
+        <canvas id="dischargesChart"></canvas>
+        <canvas id="generalWardChart"></canvas>
+        <canvas id="icuChart"></canvas>
+        
+        <canvas id="averageStayChart"></canvas>
+
     </div>
 
     <script src="script.js"></script>
+    <script>
+        document.getElementById('surgery-register-card').addEventListener('click', function() {
+            window.open('https://docs.google.com/spreadsheets/d/1CHU8Cgxgg5IvL3nB6ackAdqxe7-CNkmWDvtYE-keuXI/edit', '_blank');
+        });
 
-    <!-- Vue.jsとして動作させるスクリプト -->
-    <!-- <script src="vue-app.js"></script> -->
+        document.getElementById('duty-management-card').addEventListener('click', function() {
+            window.open('https://docs.google.com/spreadsheets/d/1EX0t4wpSJZkEkhZ38PUGIyZVMOeGOTNdy2OI3rb_CTc/edit', '_blank');
+        });
+
+        document.getElementById('covid-status-card').addEventListener('click', function() {
+            window.open('https://docs.google.com/spreadsheets/d/1pgLCwJPxPpGO_-ro_J78QYqLzjrGHgTBKHL3ngybBbY/edit?gid=0#gid=0'); // ここに「新型コロナ感染状況」のスプレッドシートURLを入力
+        });
+
+        // グラフの再表示
+        fetchData();
+    </script>
+
 </body>
-
 </html>
