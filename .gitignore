@@ -238,3 +238,6 @@ $RECYCLE.BIN/
 # MCP configuration files
 .mcp.json
 .cursor/.mcp.json
+
+# Claude Code documentation
+CLAUDE.md
