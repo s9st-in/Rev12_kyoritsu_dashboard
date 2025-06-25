@@ -39,7 +39,6 @@ h1.left-align {
     padding: 15px;
     border-radius: 8px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    width: 300px;
     min-height: 120px;
     text-align: center;
     font-size: 24px;
@@ -47,6 +46,8 @@ h1.left-align {
     flex-direction: column;
     justify-content: center;
     transition: background-color 0.3s ease-in-out; /* ✅ 色変化のアニメーション */
+    /* ✅ グリッドレイアウト内でgapを適用させるために明示的に指定 */
+    box-sizing: border-box;
 }
 
 .card h3 {
@@ -160,4 +161,26 @@ canvas {
     box-sizing: border-box;
     margin: 0 auto;
     font-size: 24px !important;
+}
+
+/* ✅ グリッドレイアウト用のクラス（TailwindCSSが適用されない場合の対応） */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem; /* tw-gap-5相当 */
+    padding: 0.625rem; /* tw-p-2.5相当 */
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
