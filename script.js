@@ -1,34 +1,123 @@
-const API_CONFIG_URL = {
-    // ダッシュボードのデータ取得 & グラフ表示用 API
-    'kyoritsu-dashboard': "https://script.google.com/macros/s/AKfycbwor8y2k5p2zXUcIj7rBnyn3Z_V4cTyEgcyGzGnvy_VgAjam2ymmMFJNy0xUvnTuzjt/exec",
-    // 「水曜会」データ取得用 API
-    'special-data': "https://script.google.com/macros/s/AKfycbyPikpNs-C043HCh9cLPIggbiZIgep44d31os8nCJtZPZz0KASzugNNbcVxThDRnjtfWA/exec"
-}
+/**
+ * 戸畑共立病院ダッシュボード
+ * リファクタリング版 - エラーハンドリング、アクセシビリティ、コード整理を改善
+ */
 
-const apiUrl = API_CONFIG_URL['kyoritsu-dashboard'];
-const specialDataApiUrl = API_CONFIG_URL['special-data'];
+// ✅ 設定をオブジェクトにまとめてグローバル変数を削減
+const DashboardConfig = {
+    API_URLS: {
+        dashboard: "https://script.google.com/macros/s/AKfycbwor8y2k5p2zXUcIj7rBnyn3Z_V4cTyEgcyGzGnvy_VgAjam2ymmMFJNy0xUvnTuzjt/exec",
+        specialData: "https://script.google.com/macros/s/AKfycbyPikpNs-C043HCh9cLPIggbiZIgep44d31os8nCJtZPZz0KASzugNNbcVxThDRnjtfWA/exec"
+    },
+    CHART_SETTINGS: {
+        daysToShow: 14,
+        defaultHeight: 350,
+        debounceDelay: 200
+    },
+    RETRY_SETTINGS: {
+        maxRetries: 3,
+        retryDelay: 2000
+    }
+};
 
-// グラフデータを保存する変数（リサイズ時の再描画用）
-let latestChartData = null;
+// ✅ アプリケーション状態を管理するオブジェクト
+const AppState = {
+    latestChartData: null,
+    isLoading: false,
+    retryCount: 0
+};
 
 
 /**
- * 指定されたURLからデータを取得してJSONとして返す
+ * ✅ ユーザー通知機能
+ */
+const NotificationManager = {
+    /**
+     * 通知を表示する
+     * @param {string} message - 表示するメッセージ
+     * @param {string} type - 通知タイプ ('error' | 'success' | 'info')
+     * @param {number} duration - 表示時間（ミリ秒）
+     */
+    show(message, type = 'error', duration = 5000) {
+        // 既存の通知を削除
+        this.clear();
+
+        const notification = document.createElement('div');
+        notification.className = `error-notification ${type === 'success' ? 'success' : ''}`;
+        notification.setAttribute('role', 'alert');
+        notification.setAttribute('aria-live', 'polite');
+        
+        notification.innerHTML = `
+            ${message}
+            <button class="close-btn" aria-label="通知を閉じる">&times;</button>
+        `;
+
+        document.body.appendChild(notification);
+
+        // 閉じるボタンのイベントリスナー
+        const closeBtn = notification.querySelector('.close-btn');
+        closeBtn.addEventListener('click', () => this.clear());
+
+        // 自動削除
+        if (duration > 0) {
+            setTimeout(() => this.clear(), duration);
+        }
+    },
+
+    /**
+     * 通知を削除する
+     */
+    clear() {
+        const existing = document.querySelector('.error-notification');
+        if (existing) {
+            existing.remove();
+        }
+    }
+};
+
+/**
+ * ✅ 改善されたAPI取得関数（リトライ機能付き）
  * @param {string} url - データを取得するURL
  * @param {Object} options - fetchのオプション設定
+ * @param {number} retryCount - 現在のリトライ回数
  * @returns {Promise<Object>} 取得したJSONデータ
- * @throws {Error} HTTP通信エラーまたはJSONパースエラー時
  */
-async function fetchApiData(url, options = {}) {
+async function fetchApiData(url, options = {}, retryCount = 0) {
     try {
-        const response = await fetch(url, options);
+        const response = await fetch(url, {
+            ...options,
+            timeout: 10000 // 10秒タイムアウト
+        });
+        
         if (!response.ok) {
-            throw new Error(`HTTP エラー: ${response.status}`);
+            throw new Error(`HTTP エラー: ${response.status} ${response.statusText}`);
         }
-        return await response.json();
+        
+        const data = await response.json();
+        
+        // 成功時はリトライカウントをリセット
+        AppState.retryCount = 0;
+        
+        return data;
     } catch (error) {
-        console.error("❌ データ取得エラー:", error);
-        throw error;
+        console.error(`❌ データ取得エラー (試行 ${retryCount + 1}/${DashboardConfig.RETRY_SETTINGS.maxRetries}):`, error);
+        
+        // リトライ処理
+        if (retryCount < DashboardConfig.RETRY_SETTINGS.maxRetries - 1) {
+            NotificationManager.show(
+                `データ取得に失敗しました。${DashboardConfig.RETRY_SETTINGS.retryDelay / 1000}秒後に再試行します...`,
+                'error',
+                DashboardConfig.RETRY_SETTINGS.retryDelay
+            );
+            
+            await new Promise(resolve => setTimeout(resolve, DashboardConfig.RETRY_SETTINGS.retryDelay));
+            return fetchApiData(url, options, retryCount + 1);
+        } else {
+            // 最大リトライ回数に達した場合
+            const errorMessage = `データの取得に失敗しました。ネットワーク接続を確認してページを再読み込みしてください。\nエラー: ${error.message}`;
+            NotificationManager.show(errorMessage, 'error', 0); // 手動で閉じるまで表示
+            throw error;
+        }
     }
 }
 
@@ -69,105 +158,244 @@ function describeSpecialData(data) {
 }
 
 /**
- * 特別データ（水曜会と経営戦略室のお知らせ）をAPIから取得する
+ * ✅ 改善された特別データ取得関数
  * @returns {Promise<void>}
  */
 async function fetchSpecialData() {
+    if (AppState.isLoading) {
+        console.log("既にデータ取得中のため、スキップします");
+        return;
+    }
+
     try {
-        console.log("Fetching Special Data...");
+        AppState.isLoading = true;
+        console.log("特別データを取得中...");
 
-        const result = await fetchApiData(specialDataApiUrl);
+        const result = await fetchApiData(DashboardConfig.API_URLS.specialData);
 
-        console.log("Special Data Response:", result);
+        console.log("特別データ取得成功:", result);
 
         if (!result || !result.specialData) {
-            console.error("❌ APIから「水曜会」「経営戦略室の戦略」のデータを取得できませんでした");
-            return;
+            throw new Error("APIから特別データを取得できませんでした");
         }
 
-        // --- describeSpecialData関数で描画します。データをresultで渡します。
         describeSpecialData(result.specialData);
+        
+        // 成功通知（開発時のみ表示、本番では削除可能）
+        if (process?.env?.NODE_ENV === 'development') {
+            NotificationManager.show("特別データの取得が完了しました", 'success', 2000);
+        }
 
     } catch (error) {
         console.error("❌ 特別データ取得エラー:", error);
+        NotificationManager.show(
+            "特別データの取得に失敗しました。一部の情報が表示されない可能性があります。",
+            'error',
+            5000
+        );
+    } finally {
+        AppState.isLoading = false;
     }
 }
 
 /**
- * グラフのみを描画する関数
+ * ✅ 改善されたグラフ描画関数
  * @param {Object} result - APIレスポンスデータ
  * @param {Array<Object>} result.data - 時系列データの配列
  */
 function drawCharts(result) {
-    // グラフ描画（表示する期間を変更可能）
-    const daysToShow = 14;
-    const labels = result.data.slice(-daysToShow).map(item => formatDateForChart(item["日付"]));
+    try {
+        if (!result || !result.data || !Array.isArray(result.data)) {
+            throw new Error("グラフデータが無効です");
+        }
 
-    createChart("bedChart", "病床利用率 (%)", labels, result.data.map(item => item["病床利用率 (%)"] * 100), "blue", "％", 110);
-    createChart("ambulanceChart", "救急車搬入数", labels, result.data.map(item => item["救急車搬入数"]), "red", "台");
-    createChart("inpatientsChart", "入院患者数", labels, result.data.map(item => item["入院患者数"]), "green", "人");
-    createChart("dischargesChart", "退院予定数", labels, result.data.map(item => item["退院予定数"]), "orange", "人");
-    createChart("generalWardChart", "一般病棟在院数", labels, result.data.map(item => item["一般病棟在院数"]), "purple", "床");
-    createChart("icuChart", "集中治療室在院数", labels, result.data.map(item => item["集中治療室在院数"]), "teal", "床");
+        const { daysToShow } = DashboardConfig.CHART_SETTINGS;
+        const recentData = result.data.slice(-daysToShow);
+        const labels = recentData.map(item => formatDateForChart(item["日付"]));
 
-    // 平均在院日数のグラフを追加
-    createChart("averageStayChart", "平均在院日数", labels, result.data.slice(-daysToShow).map(item => item["平均在院日数"]), "darkblue", "日");
+        // グラフ設定の配列（保守性向上）
+        const chartConfigs = [
+            {
+                id: "bedChart",
+                title: "病床利用率 (%)",
+                data: result.data.map(item => item["病床利用率 (%)"] * 100),
+                color: "blue",
+                unit: "％",
+                maxY: 110
+            },
+            {
+                id: "ambulanceChart",
+                title: "救急車搬入数",
+                data: result.data.map(item => item["救急車搬入数"]),
+                color: "red",
+                unit: "台"
+            },
+            {
+                id: "inpatientsChart",
+                title: "入院患者数",
+                data: result.data.map(item => item["入院患者数"]),
+                color: "green",
+                unit: "人"
+            },
+            {
+                id: "dischargesChart",
+                title: "退院予定数",
+                data: result.data.map(item => item["退院予定数"]),
+                color: "orange",
+                unit: "人"
+            },
+            {
+                id: "generalWardChart",
+                title: "一般病棟在院数",
+                data: result.data.map(item => item["一般病棟在院数"]),
+                color: "purple",
+                unit: "床"
+            },
+            {
+                id: "icuChart",
+                title: "集中治療室在院数",
+                data: result.data.map(item => item["集中治療室在院数"]),
+                color: "teal",
+                unit: "床"
+            },
+            {
+                id: "averageStayChart",
+                title: "平均在院日数",
+                data: recentData.map(item => item["平均在院日数"]),
+                color: "darkblue",
+                unit: "日"
+            }
+        ];
+
+        // 各グラフを作成
+        chartConfigs.forEach(config => {
+            createChart(
+                config.id,
+                config.title,
+                labels,
+                config.data,
+                config.color,
+                config.unit,
+                config.maxY
+            );
+        });
+
+        console.log("✅ 全グラフの描画が完了しました");
+
+    } catch (error) {
+        console.error("❌ グラフ描画エラー:", error);
+        NotificationManager.show(
+            "グラフの描画に失敗しました。データに問題がある可能性があります。",
+            'error',
+            5000
+        );
+    }
 }
 
 /**
- * APIから取得したデータをダッシュボードに表示する
+ * ✅ 改善されたデータ表示関数
  * @param {Object} result - APIレスポンスデータ
  * @param {Array<Object>} result.data - 時系列データの配列
  * @param {string} result.lastEditTime - 最終更新時刻
  */
 function describeFetchData(result) {
-
-    // データを保存（リサイズ時の再描画用）
-    latestChartData = result;
-
-    // 最新のデータを取得
-    const latestData = result.data[result.data.length - 1];
-
-    // 更新時刻を確実に取得するように修正
-    let lastEditTime = result.lastEditTime ? new Date(result.lastEditTime) : null;
-    let formattedTime = lastEditTime ? `${lastEditTime.getHours().toString().padStart(2, '0')}:${lastEditTime.getMinutes().toString().padStart(2, '0')}` : "--:--";
-
-    // 日付フォーマット
-    const formattedDate = latestData["日付"] ? formatDate(latestData["日付"]) : "日付不明";
-
-    // 更新時刻を確実に表示
-    document.getElementById("latest-date").innerHTML = `${formattedDate}　<span class="update-time">更新時刻：${formattedTime} </span>`;
-
-    document.querySelector("[data-metric='bed-utilization'] strong").innerText = `${(latestData["病床利用率 (%)"] * 100).toFixed(1)}%`;
-    document.querySelector("[data-metric='ambulance'] strong").innerText = `${latestData["救急車搬入数"]}台`;
-    document.querySelector("[data-metric='inpatients'] strong").innerText = `${latestData["入院患者数"]}人`;
-    document.querySelector("[data-metric='discharges'] strong").innerText = `${latestData["退院予定数"]}人`;
-    document.querySelector("[data-metric='general-ward'] strong").innerText = `${latestData["一般病棟在院数"]}/202 床`;
-    document.querySelector("[data-metric='icu'] strong").innerText = `${latestData["集中治療室在院数"]}/16 床`;
-    document.querySelector("[data-metric='average-stay'] strong").innerText = `${latestData["平均在院日数"]}日`;
-
-    // グラフ描画を分離した関数で実行
-    drawCharts(result);
-}
-
-// ✅ データ取得 & グラフ表示
-async function fetchData() {
     try {
-        console.log("Fetching Data...");
+        // データを保存（リサイズ時の再描画用）
+        AppState.latestChartData = result;
 
-        const result = await fetchApiData(apiUrl);
-        console.log("API Response:", result);
-
-        if (!result || !result.data || result.data.length === 0) {
-            console.error("❌ データが取得できませんでした");
-            return;
+        // 最新のデータを取得
+        const latestData = result.data[result.data.length - 1];
+        if (!latestData) {
+            throw new Error("最新データが見つかりません");
         }
 
-        // --- describeFetchData関数で描画します。データをresultで渡します。
-        describeFetchData(result);
+        // 更新時刻を確実に取得するように修正
+        let lastEditTime = result.lastEditTime ? new Date(result.lastEditTime) : null;
+        let formattedTime = lastEditTime ? 
+            `${lastEditTime.getHours().toString().padStart(2, '0')}:${lastEditTime.getMinutes().toString().padStart(2, '0')}` : 
+            "--:--";
+
+        // 日付フォーマット
+        const formattedDate = latestData["日付"] ? formatDate(latestData["日付"]) : "日付不明";
+
+        // DOM要素の存在確認と更新
+        const dateElement = document.getElementById("latest-date");
+        if (dateElement) {
+            dateElement.innerHTML = `${formattedDate}　<span class="update-time">更新時刻：${formattedTime} </span>`;
+        }
+
+        // メトリクス更新（エラーハンドリング付き）
+        const metrics = [
+            { selector: "[data-metric='bed-utilization'] strong", value: `${(latestData["病床利用率 (%)"] * 100).toFixed(1)}%` },
+            { selector: "[data-metric='ambulance'] strong", value: `${latestData["救急車搬入数"]}台` },
+            { selector: "[data-metric='inpatients'] strong", value: `${latestData["入院患者数"]}人` },
+            { selector: "[data-metric='discharges'] strong", value: `${latestData["退院予定数"]}人` },
+            { selector: "[data-metric='general-ward'] strong", value: `${latestData["一般病棟在院数"]}/202 床` },
+            { selector: "[data-metric='icu'] strong", value: `${latestData["集中治療室在院数"]}/16 床` },
+            { selector: "[data-metric='average-stay'] strong", value: `${latestData["平均在院日数"]}日` }
+        ];
+
+        metrics.forEach(metric => {
+            const element = document.querySelector(metric.selector);
+            if (element) {
+                element.innerText = metric.value;
+            } else {
+                console.warn(`⚠️ 要素が見つかりません: ${metric.selector}`);
+            }
+        });
+
+        // グラフ描画を分離した関数で実行
+        drawCharts(result);
+
+        console.log("✅ ダッシュボードデータの更新が完了しました");
 
     } catch (error) {
-        console.error("❌ データ取得エラー:", error);
+        console.error("❌ データ表示エラー:", error);
+        NotificationManager.show(
+            "データの表示に失敗しました。データ形式に問題がある可能性があります。",
+            'error',
+            5000
+        );
+    }
+}
+
+/**
+ * ✅ 改善されたメインデータ取得関数
+ * @returns {Promise<void>}
+ */
+async function fetchData() {
+    if (AppState.isLoading) {
+        console.log("既にデータ取得中のため、スキップします");
+        return;
+    }
+
+    try {
+        AppState.isLoading = true;
+        console.log("ダッシュボードデータを取得中...");
+
+        const result = await fetchApiData(DashboardConfig.API_URLS.dashboard);
+        console.log("ダッシュボードデータ取得成功:", result);
+
+        if (!result || !result.data || !Array.isArray(result.data) || result.data.length === 0) {
+            throw new Error("有効なデータが取得できませんでした");
+        }
+
+        describeFetchData(result);
+
+        // 成功通知（開発時のみ表示、本番では削除可能）
+        if (process?.env?.NODE_ENV === 'development') {
+            NotificationManager.show("ダッシュボードデータの取得が完了しました", 'success', 2000);
+        }
+
+    } catch (error) {
+        console.error("❌ ダッシュボードデータ取得エラー:", error);
+        NotificationManager.show(
+            "ダッシュボードデータの取得に失敗しました。しばらく待ってから再読み込みしてください。",
+            'error',
+            8000
+        );
+    } finally {
+        AppState.isLoading = false;
     }
 }
 
@@ -208,20 +436,30 @@ function getCanvasResponsiveFontSize() {
 
 
 /**
- * すべてのグラフを再描画する
+ * ✅ 改善されたグラフ再描画関数
  * @returns {void}
  */
 function redrawAllCharts() {
-    // データが存在しない場合は何もしない
-    if (!latestChartData) {
-        console.log('再描画スキップ - データがまだ読み込まれていません');
-        return;
-    }
+    try {
+        // データが存在しない場合は何もしない
+        if (!AppState.latestChartData) {
+            console.log('再描画スキップ - データがまだ読み込まれていません');
+            return;
+        }
 
-    console.log('グラフを再描画中...');
-    // グラフのみを再描画（数値データの再表示は行わない）
-    drawCharts(latestChartData);
-    console.log('グラフの再描画が完了しました');
+        console.log('グラフを再描画中...');
+        // グラフのみを再描画（数値データの再表示は行わない）
+        drawCharts(AppState.latestChartData);
+        console.log('✅ グラフの再描画が完了しました');
+
+    } catch (error) {
+        console.error('❌ グラフ再描画エラー:', error);
+        NotificationManager.show(
+            'グラフの再描画に失敗しました。',
+            'error',
+            3000
+        );
+    }
 }
 
 // ✅ グラフ作成関数（フォントサイズを動的に変更）
@@ -320,19 +558,103 @@ function formatDateForChart(dateString) {
 }
 
 /**
- * 外部リンクを新しいタブで開く
- * @param {string} url - 開くURL
+ * ✅ イベントリスナー管理オブジェクト
  */
-function openExternalLink(url) {
-    window.open(url, '_blank');
+const EventManager = {
+    /**
+     * クリック可能なカードのイベントリスナーを設定
+     */
+    setupClickableCards() {
+        const clickableCards = document.querySelectorAll('.clickable-card');
+        
+        clickableCards.forEach(card => {
+            const url = card.dataset.url;
+            if (!url) {
+                console.warn('⚠️ data-url属性が見つかりません:', card.id);
+                return;
+            }
+
+            // クリックイベント
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.openExternalLink(url);
+            });
+
+            // キーボードイベント（アクセシビリティ対応）
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.openExternalLink(url);
+                }
+            });
+        });
+
+        console.log(`✅ ${clickableCards.length}個のクリック可能なカードにイベントリスナーを設定しました`);
+    },
+
+    /**
+     * 外部リンクを新しいタブで開く
+     * @param {string} url - 開くURL
+     */
+    openExternalLink(url) {
+        try {
+            window.open(url, '_blank', 'noopener,noreferrer');
+            console.log(`✅ 外部リンクを開きました: ${url}`);
+        } catch (error) {
+            console.error('❌ 外部リンクを開けませんでした:', error);
+            NotificationManager.show(
+                'リンクを開くことができませんでした。',
+                'error',
+                3000
+            );
+        }
+    },
+
+    /**
+     * リサイズイベントリスナーを設定
+     */
+    setupResizeListener() {
+        window.addEventListener('resize', debounce(() => {
+            console.log('リサイズイベント発生 - グラフを再描画します');
+            redrawAllCharts();
+        }, DashboardConfig.CHART_SETTINGS.debounceDelay));
+
+        console.log('✅ リサイズイベントリスナーを設定しました');
+    }
+};
+
+/**
+ * ✅ アプリケーション初期化関数
+ */
+async function initializeApp() {
+    try {
+        console.log('🚀 アプリケーションを初期化中...');
+
+        // イベントリスナーの設定
+        EventManager.setupClickableCards();
+        EventManager.setupResizeListener();
+
+        // データ取得の開始
+        await Promise.allSettled([
+            fetchData(),
+            fetchSpecialData()
+        ]);
+
+        console.log('✅ アプリケーションの初期化が完了しました');
+
+    } catch (error) {
+        console.error('❌ アプリケーション初期化エラー:', error);
+        NotificationManager.show(
+            'アプリケーションの初期化に失敗しました。ページを再読み込みしてください。',
+            'error',
+            0
+        );
+    }
 }
 
-// ✅ 初期化
-fetchData();
-fetchSpecialData();  // ✅ 「水曜会」「経営戦略室の戦略」のデータ取得も実行
-
-// グラフの描画時にリサイズイベントが発生した場合、グラフを再描画する
-window.addEventListener('resize', debounce(() => {
-    console.log('リサイズイベント発生 - グラフを再描画します');
-    redrawAllCharts();
-}, 200));
+// ✅ DOMが読み込まれた後に初期化を実行
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
