@@ -3,7 +3,11 @@
  * リファクタリング版 - エラーハンドリング、アクセシビリティ、コード整理を改善
  */
 
-// ✅ 設定をオブジェクトにまとめてグローバル変数を削減
+/**
+ * ダッシュボード設定オブジェクト
+ * API URL、グラフ設定、リトライ設定をまとめて管理
+ * @constant {Object}
+ */
 const DashboardConfig = {
     API_URLS: {
         dashboard: "https://script.google.com/macros/s/AKfycbwor8y2k5p2zXUcIj7rBnyn3Z_V4cTyEgcyGzGnvy_VgAjam2ymmMFJNy0xUvnTuzjt/exec",
@@ -20,16 +24,23 @@ const DashboardConfig = {
     }
 };
 
-// ✅ アプリケーション状態を管理するオブジェクト
+/**
+ * アプリケーション状態管理オブジェクト
+ * グラフデータ、ローディング状態、リトライ回数などを管理
+ * @constant {Object}
+ */
 const AppState = {
     latestChartData: null,
     isLoading: false,
+    fetchingSpecialData: false,
     retryCount: 0
 };
 
 
 /**
- * ✅ ユーザー通知機能
+ * ユーザー通知管理オブジェクト
+ * エラーメッセージや成功通知の表示・削除を管理
+ * @namespace NotificationManager
  */
 const NotificationManager = {
     /**
@@ -66,6 +77,7 @@ const NotificationManager = {
 
     /**
      * 通知を削除する
+     * @memberof NotificationManager
      */
     clear() {
         const existing = document.querySelector('.error-notification');
@@ -76,18 +88,31 @@ const NotificationManager = {
 };
 
 /**
- * ✅ 改善されたAPI取得関数（リトライ機能付き）
- * @param {string} url - データを取得するURL
- * @param {Object} options - fetchのオプション設定
- * @param {number} retryCount - 現在のリトライ回数
+ * Google Apps Script APIからデータを取得する関数（リトライ機能付き）
+ * AbortControllerでタイムアウト制御、CORS対応、最大3回までの自動リトライを実装
+ * @param {string} url - データを取得するGoogle Apps ScriptのURL
+ * @param {Object} [options={}] - fetchのオプション設定
+ * @param {number} [retryCount=0] - 現在のリトライ回数（内部用）
  * @returns {Promise<Object>} 取得したJSONデータ
+ * @throws {Error} 最大3回のリトライ後も失敗した場合
+ * @example
+ * const data = await fetchApiData('https://script.google.com/...', {}, 0);
  */
 async function fetchApiData(url, options = {}, retryCount = 0) {
+    // AbortControllerでタイムアウト制御
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒タイムアウト
+    
     try {
         const response = await fetch(url, {
             ...options,
-            timeout: 10000 // 10秒タイムアウト
+            signal: controller.signal,
+            mode: 'cors',
+            cache: 'no-cache'
         });
+        
+        // タイムアウトをクリア
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
             throw new Error(`HTTP エラー: ${response.status} ${response.statusText}`);
@@ -100,23 +125,24 @@ async function fetchApiData(url, options = {}, retryCount = 0) {
         
         return data;
     } catch (error) {
-        console.error(`❌ データ取得エラー (試行 ${retryCount + 1}/${DashboardConfig.RETRY_SETTINGS.maxRetries}):`, error);
+        // タイムアウトをクリア
+        clearTimeout(timeoutId);
+        
+        let errorMessage = error.message;
+        if (error.name === 'AbortError') {
+            errorMessage = 'リクエストがタイムアウトしました';
+        }
+        
+        console.error(`❌ データ取得エラー (試行 ${retryCount + 1}/${DashboardConfig.RETRY_SETTINGS.maxRetries}):`, errorMessage);
         
         // リトライ処理
         if (retryCount < DashboardConfig.RETRY_SETTINGS.maxRetries - 1) {
-            NotificationManager.show(
-                `データ取得に失敗しました。${DashboardConfig.RETRY_SETTINGS.retryDelay / 1000}秒後に再試行します...`,
-                'error',
-                DashboardConfig.RETRY_SETTINGS.retryDelay
-            );
-            
+            console.log(`🔄 ${DashboardConfig.RETRY_SETTINGS.retryDelay / 1000}秒後にリトライします...`);
             await new Promise(resolve => setTimeout(resolve, DashboardConfig.RETRY_SETTINGS.retryDelay));
             return fetchApiData(url, options, retryCount + 1);
         } else {
-            // 最大リトライ回数に達した場合
-            const errorMessage = `データの取得に失敗しました。ネットワーク接続を確認してページを再読み込みしてください。\nエラー: ${error.message}`;
-            NotificationManager.show(errorMessage, 'error', 0); // 手動で閉じるまで表示
-            throw error;
+            // 最大リトライ回数に達した場合 - 呼び出し元でエラーハンドリング
+            throw new Error(errorMessage);
         }
     }
 }
@@ -124,7 +150,8 @@ async function fetchApiData(url, options = {}, retryCount = 0) {
 
 /**
  * 水曜会カードのコンテンツを生成する
- * @param {string} data - 水曜会のデータ
+ * 『水曜会 Top Down!』のタイトルとデータを含むHTMLを生成
+ * @param {string|null} data - 水曜会のデータ（nullの場合は「データなし」を表示）
  * @returns {string} 生成されたHTMLコンテンツ
  */
 function createSuiyokaiCardContent(data) {
@@ -133,6 +160,7 @@ function createSuiyokaiCardContent(data) {
 
 /**
  * 経営戦略室のお知らせカードのコンテンツを生成する
+ * 固定のお知らせ内容をHTML形式で返す（診療報酬改定、電子カルテ系統調査など）
  * @returns {string} 生成されたHTMLコンテンツ
  */
 function createKeieiCardContent() {
@@ -141,8 +169,9 @@ function createKeieiCardContent() {
 
 /**
  * 特別データ（水曜会と経営戦略室のお知らせ）をダッシュボードに表示する
+ * DOM要素の存在確認を行い、安全にHTMLコンテンツを更新する
  * @param {Object} data - 表示する特別データ
- * @param {string} data.suiyokai - 水曜会のデータ
+ * @param {string} data.suiyokai - 水曜会のデータ（空文字列またはnull可）
  */
 function describeSpecialData(data) {
     const suiyokaiCardElement = document.getElementById("suiyokai-card");
@@ -158,17 +187,21 @@ function describeSpecialData(data) {
 }
 
 /**
- * ✅ 改善された特別データ取得関数
+ * 特別データ（水曜会情報、経営戦略室お知らせ）をAPIから取得する
+ * メインデータとは独立した状態管理で、失敗してもアプリ継続可能
+ * @async
  * @returns {Promise<void>}
+ * @throws {Error} APIからデータが取得できない場合
  */
 async function fetchSpecialData() {
-    if (AppState.isLoading) {
-        console.log("既にデータ取得中のため、スキップします");
+    // 特別データ用の個別ロック
+    if (AppState.fetchingSpecialData) {
+        console.log("既に特別データ取得中のため、スキップします");
         return;
     }
 
     try {
-        AppState.isLoading = true;
+        AppState.fetchingSpecialData = true;
         console.log("特別データを取得中...");
 
         const result = await fetchApiData(DashboardConfig.API_URLS.specialData);
@@ -180,28 +213,27 @@ async function fetchSpecialData() {
         }
 
         describeSpecialData(result.specialData);
-        
-        // 成功通知（開発時のみ表示、本番では削除可能）
-        if (process?.env?.NODE_ENV === 'development') {
-            NotificationManager.show("特別データの取得が完了しました", 'success', 2000);
-        }
 
     } catch (error) {
         console.error("❌ 特別データ取得エラー:", error);
+        
+        // 特別データは必須ではないため、控えめなエラー表示
         NotificationManager.show(
-            "特別データの取得に失敗しました。一部の情報が表示されない可能性があります。",
+            "特別データの取得に失敗しました。一部の情報が表示されない場合があります。",
             'error',
-            5000
+            3000
         );
     } finally {
-        AppState.isLoading = false;
+        AppState.fetchingSpecialData = false;
     }
 }
 
 /**
- * ✅ 改善されたグラフ描画関数
+ * 病院メトリクスの時系列グラフをChart.jsで描画する
+ * 14日分のデータで病床利用率、救急車搬入数などのグラフを一括生成
  * @param {Object} result - APIレスポンスデータ
- * @param {Array<Object>} result.data - 時系列データの配列
+ * @param {Array<Object>} result.data - 時系列データの配列（各オブジェクトに日付とメトリクスを含む）
+ * @throws {Error} グラフデータが無効な場合
  */
 function drawCharts(result) {
     try {
@@ -218,7 +250,7 @@ function drawCharts(result) {
             {
                 id: "bedChart",
                 title: "病床利用率 (%)",
-                data: result.data.map(item => item["病床利用率 (%)"] * 100),
+                data: recentData.map(item => item["病床利用率 (%)"] * 100),
                 color: "blue",
                 unit: "％",
                 maxY: 110
@@ -226,35 +258,35 @@ function drawCharts(result) {
             {
                 id: "ambulanceChart",
                 title: "救急車搬入数",
-                data: result.data.map(item => item["救急車搬入数"]),
+                data: recentData.map(item => item["救急車搬入数"]),
                 color: "red",
                 unit: "台"
             },
             {
                 id: "inpatientsChart",
                 title: "入院患者数",
-                data: result.data.map(item => item["入院患者数"]),
+                data: recentData.map(item => item["入院患者数"]),
                 color: "green",
                 unit: "人"
             },
             {
                 id: "dischargesChart",
                 title: "退院予定数",
-                data: result.data.map(item => item["退院予定数"]),
+                data: recentData.map(item => item["退院予定数"]),
                 color: "orange",
                 unit: "人"
             },
             {
                 id: "generalWardChart",
                 title: "一般病棟在院数",
-                data: result.data.map(item => item["一般病棟在院数"]),
+                data: recentData.map(item => item["一般病棟在院数"]),
                 color: "purple",
                 unit: "床"
             },
             {
                 id: "icuChart",
                 title: "集中治療室在院数",
-                data: result.data.map(item => item["集中治療室在院数"]),
+                data: recentData.map(item => item["集中治療室在院数"]),
                 color: "teal",
                 unit: "床"
             },
@@ -293,10 +325,12 @@ function drawCharts(result) {
 }
 
 /**
- * ✅ 改善されたデータ表示関数
+ * 取得した病院データをダッシュボードに表示する
+ * 最新データを抽出し、日付・時刻フォーマット、メトリクス表示、グラフ描画を実行
  * @param {Object} result - APIレスポンスデータ
- * @param {Array<Object>} result.data - 時系列データの配列
- * @param {string} result.lastEditTime - 最終更新時刻
+ * @param {Array<Object>} result.data - 時系列データの配列（日付、病床利用率などを含む）
+ * @param {string} [result.lastEditTime] - 最終更新時刻（ISO文字列）
+ * @throws {Error} 最新データが見つからない場合
  */
 function describeFetchData(result) {
     try {
@@ -360,8 +394,11 @@ function describeFetchData(result) {
 }
 
 /**
- * ✅ 改善されたメインデータ取得関数
+ * メインダッシュボードデータをAPIから取得し、表示を更新する
+ * 病院の主要な運営メトリクス（病床利用率、救急車搬入数など）を取得
+ * @async
  * @returns {Promise<void>}
+ * @throws {Error} 有効なデータが取得できない場合
  */
 async function fetchData() {
     if (AppState.isLoading) {
@@ -382,17 +419,14 @@ async function fetchData() {
 
         describeFetchData(result);
 
-        // 成功通知（開発時のみ表示、本番では削除可能）
-        if (process?.env?.NODE_ENV === 'development') {
-            NotificationManager.show("ダッシュボードデータの取得が完了しました", 'success', 2000);
-        }
-
     } catch (error) {
         console.error("❌ ダッシュボードデータ取得エラー:", error);
+        
+        // メインデータ取得失敗は重要なエラー
         NotificationManager.show(
-            "ダッシュボードデータの取得に失敗しました。しばらく待ってから再読み込みしてください。",
+            "ダッシュボードデータの取得に失敗しました。ネットワーク接続を確認してページを再読み込みしてください。",
             'error',
-            8000
+            0  // 手動で閉じるまで表示
         );
     } finally {
         AppState.isLoading = false;
@@ -400,8 +434,12 @@ async function fetchData() {
 }
 
 /**
- * 画面幅に応じたグラフのフォントサイズを返す
- * @returns {Object} タイトル、軸タイトル、軸ラベルのフォントサイズを含むオブジェクト
+ * レスポンシブデザイン対応：画面幅に応じたグラフフォントサイズを取得
+ * PC（1200px超）、タブレット（768px超）、スマホ（768px以下）で異なるサイズを返す
+ * @returns {Object} フォントサイズ設定オブジェクト
+ * @returns {number} returns.titleFontSize - グラフタイトルのフォントサイズ
+ * @returns {number} returns.axisTitleFontSize - 軸タイトルのフォントサイズ
+ * @returns {number} returns.axisLabelFontSize - 軸ラベルのフォントサイズ
  */
 function getCanvasResponsiveFontSize() {
     const screenWidth = window.innerWidth;
@@ -436,7 +474,8 @@ function getCanvasResponsiveFontSize() {
 
 
 /**
- * ✅ 改善されたグラフ再描画関数
+ * リサイズ時に全グラフを再描画する
+ * AppStateに保存されたデータを使用して、グラフのみを再描画（数値データは更新しない）
  * @returns {void}
  */
 function redrawAllCharts() {
@@ -462,7 +501,18 @@ function redrawAllCharts() {
     }
 }
 
-// ✅ グラフ作成関数（フォントサイズを動的に変更）
+/**
+ * Chart.jsを使用して個別の折れ線グラフを作成する
+ * レスポンシブフォントサイズ、既存グラフの破棄、インスタンス保存を実装
+ * @param {string} canvasId - Canvas要素のID
+ * @param {string} label - グラフのタイトル
+ * @param {Array<string>} labels - X軸のラベル配列（日付）
+ * @param {Array<number>} data - Y軸のデータ配列
+ * @param {string} color - 線の色（CSSカラー名またはHEX）
+ * @param {string} unit - Y軸の単位表示
+ * @param {number|null} [maxY=null] - Y軸の最大値（設定しない場合は自動）
+ * @returns {void}
+ */
 function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
     const canvas = document.getElementById(canvasId);
     
@@ -537,32 +587,54 @@ function debounce(fn, delay = 200) {
 }
 
 
-// ✅ 日付フォーマット関数
+/**
+ * 日付文字列を日本語形式にフォーマットする
+ * @param {string|null} dateString - 日付文字列（ISO形式など）
+ * @returns {string} 「YYYY年M月D日(曜日)」形式の文字列
+ * @example
+ * formatDate('2024-12-25') // '2024年12月25日(水)'
+ */
 function formatDate(dateString) {
     if (!dateString) return "日付不明";
     const date = new Date(dateString);
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日(${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]})`;
 }
 
-// ✅ 時刻フォーマット関数
+/**
+ * 日付文字列から時刻部分をHH:MM形式で抽出する
+ * @param {string|null} dateString - 日付文字列（ISO形式など）
+ * @returns {string} 「HH:MM」形式の時刻文字列
+ * @example
+ * formatTime('2024-12-25T14:30:00') // '14:30'
+ */
 function formatTime(dateString) {
     if (!dateString) return "--:--";
     const date = new Date(dateString);
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 }
 
-// ✅ グラフ用の日付フォーマット
+/**
+ * グラフのX軸用に日付を簡潔な形式にフォーマットする
+ * @param {string} dateString - 日付文字列（ISO形式など）
+ * @returns {string} 「M/D」形式の文字列
+ * @example
+ * formatDateForChart('2024-12-25') // '12/25'
+ */
 function formatDateForChart(dateString) {
     const date = new Date(dateString);
     return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
 /**
- * ✅ イベントリスナー管理オブジェクト
+ * イベントリスナー管理オブジェクト
+ * クリック可能カード、リサイズイベントの設定と管理を担当
+ * @namespace EventManager
  */
 const EventManager = {
     /**
      * クリック可能なカードのイベントリスナーを設定
+     * data-url属性を持つ.clickable-card要素にクリックとキーボードイベントを追加
+     * @memberof EventManager
      */
     setupClickableCards() {
         const clickableCards = document.querySelectorAll('.clickable-card');
@@ -593,8 +665,10 @@ const EventManager = {
     },
 
     /**
-     * 外部リンクを新しいタブで開く
-     * @param {string} url - 開くURL
+     * 外部リンクを新しいタブで安全に開く
+     * noopener,noreferrerオプションでセキュリティ対策を実装
+     * @memberof EventManager
+     * @param {string} url - 開くURL（Google SheetsなURLなど）
      */
     openExternalLink(url) {
         try {
@@ -611,7 +685,9 @@ const EventManager = {
     },
 
     /**
-     * リサイズイベントリスナーを設定
+     * ウィンドウリサイズイベントリスナーを設定
+     * デバウンス処理で連続リサイズを抑制し、グラフ再描画を実行
+     * @memberof EventManager
      */
     setupResizeListener() {
         window.addEventListener('resize', debounce(() => {
@@ -624,7 +700,11 @@ const EventManager = {
 };
 
 /**
- * ✅ アプリケーション初期化関数
+ * アプリケーションの初期化処理を実行する
+ * イベントリスナー設定後、メインデータと特別データを並行取得する
+ * @async
+ * @returns {Promise<void>}
+ * @throws {Error} 初期化に失敗した場合
  */
 async function initializeApp() {
     try {
@@ -652,7 +732,10 @@ async function initializeApp() {
     }
 }
 
-// ✅ DOMが読み込まれた後に初期化を実行
+/**
+ * DOMの読み込み状態をチェックして初期化を実行
+ * DOMContentLoadedイベントまたは即座実行でアプリケーションを開始
+ */
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
