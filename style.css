@@ -157,34 +157,6 @@ canvas {
     --header-card-height: 220px; /* ★ デフォルトの縦幅（自由に変更可） */
 }
 
-/* ✅ ヘッダーエリアのレイアウト */
-.header-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
-}
-
-/* ✅ タイトルのエリアを確保し、カードとの間にスペースを作る */
-.header-left {
-    flex-grow: 1;
-    margin-right: 50px;
-}
-
-/* script.jsにあった定義を削除したので、こちらで定義します */
-.header-left h1 {
-    font-size: 32px;
-}
-
-/* ✅ ヘッダー内のカードを右端に寄せる */
-.header-cards {
-    display: flex;
-    gap: 15px;
-    margin-left: auto;
-    flex-shrink: 0;
-    min-width: calc(var(--header-card-width) * 2 + 30px); /* カード2枚分の幅＋間隔 */
-}
-
 /* ✅ 追加: タイトル横のカードデザイン（サイズ自由変更可能） */
 .header-card {
     background: white;
