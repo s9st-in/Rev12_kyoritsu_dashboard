@@ -39,7 +39,6 @@ h1.left-align {
     padding: 15px;
     border-radius: 8px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    min-height: 120px;
     text-align: center;
     font-size: 24px;
     display: flex;
@@ -48,6 +47,10 @@ h1.left-align {
     transition: background-color 0.3s ease-in-out; /* ✅ 色変化のアニメーション */
     /* ✅ グリッドレイアウト内でgapを適用させるために明示的に指定 */
     box-sizing: border-box;
+    /* ✅ グリッドセルの幅と高さに完全に依存 */
+    width: 100%;
+    height: 100%; /* ✅ グリッドセルの高さいっぱいに拡張 */
+    min-height: 120px; /* ✅ 最小高さは維持 */
 }
 
 .card h3 {
@@ -119,21 +122,23 @@ h1.left-align {
     --header-card-height: 220px; /* ★ デフォルトの縦幅（自由に変更可） */
 }
 
-/* ✅ 追加: タイトル横のカードデザイン（サイズ自由変更可能） */
+
+/* ✅ 追加: タイトル横のカードデザイン（可変サイズ対応） */
 .header-card {
     background: white;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    width: var(--header-card-width);  /* ★ 自由に変更できる横幅 */
-    height: var(--header-card-height); /* ★ 自由に変更できる縦幅 */
-    max-width: 100%;
+    width: 100%;
+    height: 100%; /* ✅ グリッドセルの高さいっぱいに拡張 */
+    min-height: var(--header-card-height); /* ★ 最小高さとして変数を使用 */
     text-align: left;  /* 表示を修正 */
     font-size: 24px;
     font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
 }
 
 /* ✅ レスポンシブ対応（タブレット） */
@@ -141,12 +146,25 @@ h1.left-align {
     canvas {
         height: 300px !important;
     }
+    
+
+    
+    .header-card {
+        width: 100%;
+    }
 }
 
 /* ✅ レスポンシブ対応（スマホ） */
 @media (max-width: 768px) {
     canvas {
         height: 250px !important;
+    }
+    
+
+    
+    .header-card {
+        width: 100%;
+        font-size: 20px;
     }
 }
 
@@ -166,9 +184,9 @@ canvas {
 /* ✅ グリッドレイアウト用のクラス（TailwindCSSが適用されない場合の対応） */
 .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-auto-rows: 1fr; /* ✅ 各行のカードの高さを揃える */
     gap: 1.25rem; /* tw-gap-5相当 */
-    padding: 0.625rem; /* tw-p-2.5相当 */
     max-width: 100%;
     margin: 0 auto;
 }
@@ -176,6 +194,18 @@ canvas {
 @media (min-width: 768px) {
     .cards-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ✅ ヘッダーカード部分は最大2列に制限 */
+.header-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    max-width: 100%;
+}
+
+@media (min-width: 768px) {
+    .header-cards-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
     }
 }
 
