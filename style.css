@@ -35,15 +35,6 @@ h1.left-align {
     font-weight: bold;
 }
 
-/* ✅ ダッシュボードカードレイアウト */
-.dashboard {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin: 20px;
-}
-
 .card {
     background: white;
     padding: 15px;
@@ -57,11 +48,6 @@ h1.left-align {
     flex-direction: column;
     justify-content: center;
     transition: background-color 0.3s ease-in-out; /* ✅ 色変化のアニメーション */
-}
-
-/* これまではJavaScript側で設定していたstyle属性でfont-sizeを28pxにしていました */
-.dashboard .card {
-    font-size: 28px;
 }
 
 .card h3 {
@@ -124,30 +110,6 @@ h1.left-align {
     background-color: #e6b800; /* ✅ 少し濃い色 */
 }
 
-
-/* ✅ グラフエリアのレイアウト */
-.charts-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding: 10px;
-    max-width: 100%;
-    margin: 0 auto;
-}
-
-/* ✅ グラフのスタイル調整 */
-canvas {
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-    height: 350px !important;
-    width: 100% !important;
-    box-sizing: border-box;
-    margin: 0 auto;
-    font-size: 24px !important;
-}
-
 /* ✅ 変数を定義（カードのサイズを自由に変更可能に） */
 :root {
     /* これまではJavaScript側で設定していたstyle属性でwidthを680pxにしていました */
@@ -176,9 +138,6 @@ canvas {
 
 /* ✅ レスポンシブ対応（タブレット） */
 @media (max-width: 1024px) {
-    .charts-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
     canvas {
         height: 300px !important;
     }
@@ -186,10 +145,20 @@ canvas {
 
 /* ✅ レスポンシブ対応（スマホ） */
 @media (max-width: 768px) {
-    .charts-grid {
-        grid-template-columns: 1fr;
-    }
     canvas {
         height: 250px !important;
     }
+}
+
+/* ✅ グラフのスタイル調整 */
+canvas {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+    height: 350px !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    margin: 0 auto;
+    font-size: 24px !important;
 }

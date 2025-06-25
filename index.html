@@ -64,26 +64,26 @@
     </header>
 
 
-    <div class="dashboard">
-        <div class="card">
+    <div class="tw-flex tw-justify-center tw-flex-wrap tw-gap-4 tw-m-5">
+        <div class="card" data-metric="bed-utilization">
             <h3>病床利用率</h3><strong>--%</strong>
         </div>
-        <div class="card">
+        <div class="card" data-metric="ambulance">
             <h3>救急車搬入</h3><strong>--台</strong>
         </div>
-        <div class="card">
+        <div class="card" data-metric="inpatients">
             <h3>入院患者</h3><strong>--人</strong>
         </div>
-        <div class="card">
+        <div class="card" data-metric="discharges">
             <h3>退院予定</h3><strong>--人</strong>
         </div>
-        <div class="card">
+        <div class="card" data-metric="general-ward">
             <h3>一般病棟在院数</h3><strong>--/218 床</strong>
         </div>
-        <div class="card">
+        <div class="card" data-metric="icu">
             <h3>集中治療室在院数</h3><strong>--/16 床</strong>
         </div>
-        <div class="card">
+        <div class="card" data-metric="average-stay">
             <h3>平均在院日数</h3><strong>--日</strong>
         </div>
         <div class="card" id="surgery-register-card"
@@ -107,7 +107,7 @@
         </div>
     </div>
 
-    <div class="charts-grid">
+    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-5 tw-p-2.5 tw-max-w-full tw-mx-auto charts-grid">
         <div class="chart-container">
             <canvas id="bedChart"></canvas>
         </div>

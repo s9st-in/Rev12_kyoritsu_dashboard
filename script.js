@@ -138,13 +138,13 @@ function describeFetchData(result) {
     // 更新時刻を確実に表示
     document.getElementById("latest-date").innerHTML = `${formattedDate}<br><span class="update-time">更新時刻：${formattedTime}</span>`;
 
-    document.querySelector(".dashboard .card:nth-child(1) strong").innerText = `${(latestData["病床利用率 (%)"] * 100).toFixed(1)}%`;
-    document.querySelector(".dashboard .card:nth-child(2) strong").innerText = `${latestData["救急車搬入数"]}台`;
-    document.querySelector(".dashboard .card:nth-child(3) strong").innerText = `${latestData["入院患者数"]}人`;
-    document.querySelector(".dashboard .card:nth-child(4) strong").innerText = `${latestData["退院予定数"]}人`;
-    document.querySelector(".dashboard .card:nth-child(5) strong").innerText = `${latestData["一般病棟在院数"]}/202 床`;
-    document.querySelector(".dashboard .card:nth-child(6) strong").innerText = `${latestData["集中治療室在院数"]}/16 床`;
-    document.querySelector(".dashboard .card:nth-child(7) strong").innerText = `${latestData["平均在院日数"]}日`;
+    document.querySelector("[data-metric='bed-utilization'] strong").innerText = `${(latestData["病床利用率 (%)"] * 100).toFixed(1)}%`;
+    document.querySelector("[data-metric='ambulance'] strong").innerText = `${latestData["救急車搬入数"]}台`;
+    document.querySelector("[data-metric='inpatients'] strong").innerText = `${latestData["入院患者数"]}人`;
+    document.querySelector("[data-metric='discharges'] strong").innerText = `${latestData["退院予定数"]}人`;
+    document.querySelector("[data-metric='general-ward'] strong").innerText = `${latestData["一般病棟在院数"]}/202 床`;
+    document.querySelector("[data-metric='icu'] strong").innerText = `${latestData["集中治療室在院数"]}/16 床`;
+    document.querySelector("[data-metric='average-stay'] strong").innerText = `${latestData["平均在院日数"]}日`;
 
     // グラフ描画を分離した関数で実行
     drawCharts(result);
