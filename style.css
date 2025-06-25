@@ -222,7 +222,17 @@ canvas {
 .cards-grid {
     display: grid;
     gap: 1.25rem;
-    grid-template-columns: repeat(3, 1fr); /* ✅ デフォルトで3列 */
+    grid-template-columns: repeat(3, 1fr); /* ✅ デフォルトで3列（元の設定に戻す） */
+    grid-auto-rows: 1fr; /* ✅ 各行のカードの高さを揃える */
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* ✅ 指標カード部専用（最大4列） */
+.cards-grid--metrics {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(4, 1fr); /* ✅ 指標カード部は最大4列 */
     grid-auto-rows: 1fr; /* ✅ 各行のカードの高さを揃える */
     max-width: 100%;
     margin: 0 auto;
@@ -241,14 +251,29 @@ canvas {
 /* ✅ レスポンシブ対応の簡素化 */
 @media (max-width: 768px) {
     .cards-grid,
-    .cards-grid--header {
+    .cards-grid--header,
+    .cards-grid--metrics {
         grid-template-columns: 1fr;
     }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-    .cards-grid {
+    .cards-grid,
+    .cards-grid--metrics {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ✅ 指標カード部専用レスポンシブ設定 */
+@media (min-width: 1025px) and (max-width: 1440px) {
+    .cards-grid--metrics {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1441px) {
+    .cards-grid--metrics {
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 
