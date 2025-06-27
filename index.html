@@ -7,13 +7,6 @@
     <title>戸畑共立病院ダッシュボード</title>
     <!-- TailwindCSSを使用（preflightを有効化） -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            corePlugins: {
-                preflight: true,
-            }
-        }
-    </script>
     
     <!-- カスタムスタイル -->
     <style>
@@ -57,7 +50,7 @@
             color: #1f2937;
             margin-bottom: 0.625rem;
             font-size: 2.25rem;
-            font-weight: bold;
+            font-weight: bold !important;
         }
 
         .date-display {
