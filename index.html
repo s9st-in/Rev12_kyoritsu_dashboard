@@ -5,19 +5,344 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>戸畑共立病院ダッシュボード</title>
-    <link rel="stylesheet" href="style.css">
-
-    <!-- tailwindcssのユーティリティークラスは「.tw-*」のプレフィックスを付けて呼び出します -->
-    <!-- また今回はCSSから→TailwindCSSへのリフトアンドシフトを行う都合上、初期段階でベーススタイルを無効化します -->
+    <!-- TailwindCSSを使用（preflightを有効化） -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            prefix: 'tw-',
             corePlugins: {
-                preflight: false,
+                preflight: true,
             }
         }
     </script>
+    
+    <!-- カスタムスタイル -->
+    <style>
+        /* ベースフォントサイズを明示的に設定 */
+        html {
+            font-size: 16px;
+        }
+
+        /* 全体の基本スタイル */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            font-weight: normal;
+            background-color: #f9f9f9;
+            font-size: 16px;
+        }
+
+        /* レイアウト用ユーティリティクラス */
+        .header-section {
+            padding: 1em 2em;
+        }
+
+        .main-section {
+            background-color: #f9fafb;
+            min-height: 100vh;
+            padding-left: 2rem;
+            padding-right: 2rem;
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .section-spacing {
+            margin-bottom: 2rem;
+        }
+
+        .title-spacing {
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            color: #1f2937;
+            margin-bottom: 0.625rem;
+            font-size: 2.25rem;
+            font-weight: bold;
+        }
+
+        .date-display {
+            font-size: 1.875rem;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        h1.left-align {
+            text-align: left;
+        }
+
+        .update-time {
+            font-size: 1.5rem;
+            color: #4b5563;
+            font-weight: bold;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: normal;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: color 0.3s ease-in-out;
+            width: 100%;
+            height: 100%;
+            min-height: 120px;
+            padding: 15px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            margin-top: 0.25rem;
+            margin-bottom: 0.25rem;
+            color: #374151;
+            font-size: 28px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card strong {
+            font-size: 32px;
+            color: black;
+            font-weight: bold;
+        }
+
+        /* 手術台帳カード（薄いピンク） */
+        #surgery-register-card {
+            background-color: #FFD1DC;
+        }
+
+        #surgery-register-card:hover {
+            background-color: #FFB6C1;
+        }
+
+        /* 当直管理表カード（薄い緑） */
+        #duty-management-card {
+            background-color: #D3F9D8;
+        }
+
+        #duty-management-card:hover {
+            background-color: #B2E7B6;
+        }
+
+        /* 新型コロナ感染状況カード（薄い青） */
+        #covid-status-card {
+            background-color: #D0E7FF;
+        }
+
+        #covid-status-card:hover {
+            background-color: #A9D0F5;
+        }
+
+        /* クリック可能なカード共通スタイル */
+        .clickable-card {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .clickable-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .clickable-card:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        .clickable-card:active {
+            transform: translateY(0);
+        }
+
+        /* メディサイナスカード */
+        #new-card {
+            background-color: #ffcc00;
+            color: #333;
+            font-size: 24px;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        /* ホバー時に色をやや濃くする */
+        #new-card:hover {
+            background-color: #e6b800;
+        }
+
+        /* 変数を定義（カードのサイズを自由に変更可能に） */
+        :root {
+            --header-card-width: 680px;
+            --header-card-height: 220px;
+        }
+
+        /* 追加: タイトル横のカードデザイン（可変サイズ対応） */
+        .header-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            width: 100%;
+            height: 100%;
+            text-align: left;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            min-height: var(--header-card-height);
+        }
+
+        /* レスポンシブ対応（タブレット） */
+        @media (max-width: 1024px) {
+            canvas {
+                height: 300px !important;
+            }
+            
+            .header-card {
+                width: 100%;
+            }
+        }
+
+        /* レスポンシブ対応（スマホ） */
+        @media (max-width: 768px) {
+            canvas {
+                height: 250px !important;
+            }
+            
+            .header-card {
+                width: 100%;
+                font-size: 1.25rem;
+            }
+        }
+
+        /* グラフのスタイル調整 */
+        canvas {
+            background-color: white;
+            border-radius: 0.5rem;
+            width: 100% !important;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 10px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            height: 350px !important;
+            font-size: 24px !important;
+        }
+
+        /* グラフコンテナのサイズ調整 */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            overflow: hidden;
+        }
+
+        /* グリッドレイアウト用のクラス（統一版） */
+        .cards-grid {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: 1fr;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* 指標カード部専用（最大4列） */
+        .cards-grid--metrics {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: 1fr;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ヘッダー専用（2列固定） */
+        .cards-grid--header {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: 1fr;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* レスポンシブ対応の簡素化 */
+        @media (max-width: 768px) {
+            .cards-grid,
+            .cards-grid--header,
+            .cards-grid--metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .cards-grid,
+            .cards-grid--metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 指標カード部専用レスポンシブ設定 */
+        @media (min-width: 1025px) and (max-width: 1440px) {
+            .cards-grid--metrics {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1441px) {
+            .cards-grid--metrics {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* エラー通知用スタイル */
+        .error-notification {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            max-width: 400px;
+            font-size: 1rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .error-notification.success {
+            background-color: #f0fdf4;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .error-notification .close-btn {
+            float: right;
+            background-color: transparent;
+            border: none;
+            font-size: 1.125rem;
+            cursor: pointer;
+            margin-left: 0.625rem;
+            color: inherit;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
 
     <!-- Vue.js(v3)をCDN経由で読み込む -->
     <!-- <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script> -->

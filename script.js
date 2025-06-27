@@ -487,7 +487,19 @@ function redrawAllCharts() {
         }
 
         console.log('グラフを再描画中...');
-        // グラフのみを再描画（数値データの再表示は行わない）
+        
+        // 既存のChart.jsインスタンスをリサイズ
+        const canvasIds = ['bedChart', 'ambulanceChart', 'inpatientsChart', 'dischargesChart', 'generalWardChart', 'icuChart', 'averageStayChart'];
+        
+        canvasIds.forEach(canvasId => {
+            const canvas = document.getElementById(canvasId);
+            if (canvas && canvas.chartInstance) {
+                // Chart.jsの内蔵リサイズ機能を呼び出す
+                canvas.chartInstance.resize();
+            }
+        });
+        
+        // フォントサイズが変更されている可能性があるため完全再描画
         drawCharts(AppState.latestChartData);
         console.log('✅ グラフの再描画が完了しました');
 
@@ -545,12 +557,16 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            onResize: (chart) => {
+                // リサイズ時のカスタム処理
+                chart.update();
+            },
             plugins: {
                 legend: { display: false },
                 title: {
                     display: true,
                     text: label,
-                    font: { size: titleFontSize } // ✅ `weight` を削除
+                    font: { size: titleFontSize }
                 }
             },
             scales: {
@@ -566,6 +582,17 @@ function createChart(canvasId, label, labels, data, color, unit, maxY = null) {
                 },
                 x: {
                     ticks: { font: { size: axisLabelFontSize } }
+                }
+            },
+            // アニメーション設定でリサイズ時の滑らかさを向上
+            animation: {
+                duration: 0 // リサイズ時のアニメーションを無効化してレスポンス向上
+            },
+            transitions: {
+                resize: {
+                    animation: {
+                        duration: 0
+                    }
                 }
             }
         }
